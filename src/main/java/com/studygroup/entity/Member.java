@@ -33,11 +33,12 @@ public class Member extends BaseTimeEntity implements UserDetails {
     @OneToMany(mappedBy = "member", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<EmailToken> emailTokenList;
 
-    @OneToOne(mappedBy = "member")
-    private ProjectTeamMember projectTeamMember;
 
     @OneToMany(mappedBy = "member")
     private List<Room> roomList;
+
+    @OneToMany(mappedBy = "member")
+    private List<StudyGroupMember> studyGroupMemberList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

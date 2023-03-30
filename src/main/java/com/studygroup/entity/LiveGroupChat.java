@@ -7,27 +7,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
-public class MemberProjectHistory {
+public class LiveGroupChat extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private boolean succeeded;
+    @Column(length = 255, nullable = false)
+    private String payload;
 
-    @Column(length = 64, nullable = false)
-    private String teamName;
-
-    @ManyToOne
+    @OneToOne
     @JoinColumn
-    private ProjectTeamMember projectTeamMember;
-
-
-
-
-
-
-
+    private LiveGroupRoom liveGroupRoom;
 
 }
