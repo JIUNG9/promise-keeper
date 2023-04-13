@@ -1,16 +1,21 @@
 package com.studygroup.entity;
 
 
-import jakarta.persistence.*;
-import lombok.Data;
+import javax.persistence.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
 @Entity
-public class Room extends BaseTimeEntity{
+@Builder
+public class ChatRoom extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +28,7 @@ public class Room extends BaseTimeEntity{
     @JoinColumn
     private Member member;
 
-    @OneToMany(mappedBy = "room")
+    @OneToMany(mappedBy = "chatRoom")
     private List<Chat> chatList;
 
 }

@@ -1,0 +1,64 @@
+
+logging:
+  level:
+    root: info
+spring:
+  messages:
+    basename: errors
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    url: jdbc:mysql://habit.cwhph0ydcn7e.ap-northeast-2.rds.amazonaws.com:3306/habit
+    username: admin
+    password: admin123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      javax:
+        persistence:
+          validation:
+            mode: none
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+  mail:
+    smtp:
+      auth: update
+      ssl: true
+      starttls:
+        enable: true
+    host: 'smtp.gmail.com'
+    port: 587
+    username: 'rnwldnd7248@gmail.com'
+    password: 'exoyjqfefwlutwmy'
+  devtools:
+    restart:
+      enabled: false
+
+server:
+  port : 5000
+  servlet:
+    session:
+      tracking-modes: cookie
+    timeout: 60
+    port: 8082
+  error:
+    whitelabel:
+      enabled: false
+    include-exception: true
+    include-binding-errors: always
+    include-message: always
+
+  security:
+    user:
+      name: 'jiung'
+      password: '1234'
+
+
+
+

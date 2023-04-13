@@ -1,13 +1,15 @@
 package com.studygroup.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import javax.persistence.*;
 
+import lombok.*;
+
+@AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Builder
+@Getter
 @Entity
-public class GroupMemberSchedule extends BaseTimeEntity{
+public class StudyGroupMemberPlan extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
