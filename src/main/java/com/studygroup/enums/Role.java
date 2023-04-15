@@ -1,2 +1,9 @@
-package com.studygroup.entity;public enum Role {
+package com.studygroup.enums;
+
+import lombok.Getter;
+
+@Getter
+public enum Role {
+    ADMIN,
+    USER;
 }

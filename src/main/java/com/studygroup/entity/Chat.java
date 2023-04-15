@@ -1,11 +1,13 @@
 package com.studygroup.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import javax.persistence.*;
 
+import lombok.*;
+
+@AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Builder
+@Getter
 @Entity
 public class Chat extends BaseTimeEntity{
 
@@ -18,7 +20,7 @@ public class Chat extends BaseTimeEntity{
 
     @ManyToOne
     @JoinColumn
-    private Room room;
+    private ChatRoom chatRoom;
 
 
 }

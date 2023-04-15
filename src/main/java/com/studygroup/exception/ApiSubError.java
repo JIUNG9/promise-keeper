@@ -1,4 +1,4 @@
-package com.module.exception;
+package com.studygroup.exception;
 
 import lombok.*;
 

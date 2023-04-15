@@ -1,4 +1,4 @@
-package com.module.utils.lambda;
+package com.studygroup.util.lambda;
 
 import java.util.function.Function;
 import java.util.function.Supplier;

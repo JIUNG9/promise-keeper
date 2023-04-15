@@ -26,5 +26,5 @@ public class StudyGroupMemberPlan extends BaseTimeEntity{
 
     @ManyToOne
     @JoinColumn
-    private StudyGroupMember GroupMemberSchedule;
+    private StudyGroupMember studyGroupMember;
 }

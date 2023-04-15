@@ -1,28 +1,32 @@
 package com.studygroup.entity;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
+
+import com.studygroup.enums.TokenType;
 import lombok.*;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 
-import java.util.Date;
-
-
-@Data
-@Entity
+@AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Entity
 @Builder
 @Table(name = "email_token")
 public class EmailToken extends BaseTimeEntity {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "token_id")
-    private Long tokenId;
+    private Long id;
 
     @Column(name = "confirmation_token")
     private String confirmationToken;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TokenType tokenType;
+
+    @ManyToOne(optional = true)
+    @JoinColumn
     private Member member;
 
 }
