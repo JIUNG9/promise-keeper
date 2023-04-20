@@ -1,9 +1,11 @@
 package com.studygroup.controller;
 
 import com.studygroup.config.MailConfig;
+import com.studygroup.entity.Member;
 import com.studygroup.repository.EmailRepository;
 import com.studygroup.repository.UserRepository;
 import com.studygroup.service.email.*;
+import com.studygroup.service.user.UserService;
 import com.studygroup.util.MailSender;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +26,8 @@ public class EmailController {
     private final MailSender mailSender;
     private final MailConfig mailConfig;
     private final EmailRepository emailRepository;
-    private final UserRepository userRepository;
+    private final UserRepository userRepository;;
+    private final UserService userService;
     private final SendTokenToEmailService sendPasswordResetToken;
     private final SendTokenToEmailService sendVerificationToken;
     private final SaveTheToken saveTheVerificationToken;
@@ -35,13 +39,14 @@ public class EmailController {
     public EmailController(MailSender mailSender,
                            MailConfig mailConfig,
                            UserRepository userRepository,
-                           EmailRepository emailRepository
-                        ) {
+                           EmailRepository emailRepository,
+                           UserService userService) {
 
         this.mailSender = mailSender;
         this.mailConfig = mailConfig;
         this.userRepository = userRepository;
         this.emailRepository = emailRepository;
+        this.userService = userService;
         this.sendPasswordResetToken = new SendPasswordResetToken(mailSender, userRepository);
         this.sendVerificationToken = new SendVerificationToken(mailSender, userRepository);
         this.saveTheVerificationToken = new SaveTheVerificationToken(emailRepository, userRepository);
@@ -59,8 +64,9 @@ public class EmailController {
      */
 
     @PostMapping("/api/user/email/verification/user-email")
-    public ResponseEntity<Object> sendVerificationEmailToUser(@RequestParam Long memberId){
+    public ResponseEntity<Object> sendVerificationEmailToUser(Authentication authResult){
 
+        Long memberId = ((Member)authResult.getPrincipal()).getId();
         checkVerificationTokenSent.checkTokenSentIfSoDelete(memberId);
         String token = saveTheVerificationToken.save(memberId);
         sendVerificationToken.sendTokenToEmail(memberId, token);
@@ -71,14 +77,15 @@ public class EmailController {
      /*
 
     sequence
-    1.
+    1. check the user-email is existed
     2.
     3.
      */
 
     @PostMapping("/api/email/password-reset/user-email")
-    public ResponseEntity<Object> sendPasswordResetTokenToUser(@RequestParam Long memberId) {
+    public ResponseEntity<Object> sendPasswordResetTokenToUser(@RequestParam String memberEmail) {
 
+        Long memberId = userService.checkMemberIsExitedByEmailBeforeSendResetPassword(memberEmail);
         checkPasswordResetTokenSent.checkTokenSentIfSoDelete(memberId);
         String token = saveTheVerificationToken.save(memberId);
         sendPasswordResetToken.sendTokenToEmail(memberId, token);

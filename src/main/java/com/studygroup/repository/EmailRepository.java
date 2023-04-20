@@ -10,4 +10,7 @@ import java.util.List;
 public interface EmailRepository extends JpaRepository<EmailToken, Integer> {
     void deleteById(Long id);
     List<EmailToken> findByMember_Id(Long memberId);
+    List<EmailToken> findByMember_Email(String email);
+
+
 }

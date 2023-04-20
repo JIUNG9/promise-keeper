@@ -4,4 +4,5 @@ import com.studygroup.entity.EmailToken;
 
 public interface SaveTheToken {
     String save(Long memberId);
+
 }

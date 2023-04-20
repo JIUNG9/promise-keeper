@@ -9,9 +9,9 @@ spring:
     ansi:
       enabled: always
   datasource:
-    url: jdbc:mysql://habit.cwhph0ydcn7e.ap-northeast-2.rds.amazonaws.com:3306/habit
-    username: admin
-    password: admin123
+    url: jdbc:mysql://localhost:3306/study_group
+    username: root
+    password: k1651227
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -41,7 +41,7 @@ spring:
       enabled: false
 
 server:
-  port : 5000
+  port : 5001
   servlet:
     session:
       tracking-modes: cookie
@@ -54,10 +54,10 @@ server:
     include-binding-errors: always
     include-message: always
 
-  security:
-    user:
-      name: 'jiung'
-      password: '1234'
+#  security:
+#    user:
+#      name: 'jiung'
+#      password: '1234'
 
 
 
