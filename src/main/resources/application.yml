@@ -41,12 +41,11 @@ spring:
       enabled: false
 
 server:
-  port : 5001
+  port : 8002
   servlet:
     session:
       tracking-modes: cookie
     timeout: 60
-    port: 8082
   error:
     whitelabel:
       enabled: false

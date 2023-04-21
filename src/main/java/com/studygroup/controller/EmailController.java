@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,7 +66,7 @@ public class EmailController {
      */
 
     @PostMapping("/api/user/email/verification/user-email")
-    public ResponseEntity<Object> sendVerificationEmailToUser(Authentication authResult){
+    public ResponseEntity<Object> sendVerificationEmailToUser(@AuthenticationPrincipal Authentication authResult){
 
         Long memberId = ((Member)authResult.getPrincipal()).getId();
         checkVerificationTokenSent.checkTokenSentIfSoDelete(memberId);
