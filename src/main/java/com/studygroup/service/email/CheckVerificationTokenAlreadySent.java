@@ -1,6 +1,7 @@
 package com.studygroup.service.email;
 
 import com.studygroup.entity.EmailToken;
+import com.studygroup.entity.Member;
 import com.studygroup.enums.TokenType;
 import com.studygroup.repository.EmailRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,16 +12,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Service
-@Qualifier("CheckVerificationTokenAlreadySent")
+@Service("CheckVerificationTokenAlreadySent")
 public class CheckVerificationTokenAlreadySent implements CheckTokenAlreadySent {
 
     private final EmailRepository emailRepo;
 
     @Override
-    public void checkTokenSentIfSoDelete(Long memberId) {
+    public void checkTokenSentIfSoDelete(Member member) {
 
-        List<EmailToken> emailTokenList = emailRepo.findByMember_Id(memberId);
+        List<EmailToken> emailTokenList = emailRepo.findByMember(member);
         List<Long> passwordResetTokens = emailTokenList.
                 stream().
                 filter(s -> s.getTokenType().equals(TokenType.VERIFICATION_TOKEN)).
