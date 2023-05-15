@@ -1,23 +1,23 @@
-package com.module.validator;
+package com.studygroup.validation;
+
+
+
+
+import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.text.MessageFormat;
 
-
-public class PasswordValidator implements ConstraintValidator<Password,String> {
+@Component
+public class PasswordValidator implements ConstraintValidator<com.module.validator.Password,String> {
     private static final int MIN_SIZE = 8;
     private static final int MAX_SIZE = 50;
     private static final String regexPassword = "^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[$@$!%*#?&])[A-Za-z[0-9]$@$!%*#?&]{" + MIN_SIZE
             + "," + MAX_SIZE + "}$";
 
     @Override
-    public void initialize(Password constraintAnnotation) {
-    }
-
-    public boolean updatePassword(String password){
-        boolean isValidPassword = password.matches(regexPassword);
-        return isValidPassword;
+    public void initialize(com.module.validator.Password constraintAnnotation) {
     }
 
     @Override

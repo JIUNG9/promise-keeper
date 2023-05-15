@@ -1,4 +1,5 @@
-package com.module.validator;
+package com.studygroup.validation;
+
 
 
 import javax.validation.Constraint;

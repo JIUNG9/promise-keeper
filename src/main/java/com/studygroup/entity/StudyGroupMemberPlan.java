@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 @Getter
 @Entity
+@Table(name ="study_group_member_plan")
 public class StudyGroupMemberPlan extends BaseTimeEntity{
 
     @Id

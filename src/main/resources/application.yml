@@ -16,7 +16,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       javax:
         persistence:
@@ -41,7 +41,7 @@ spring:
       enabled: false
 
 server:
-  port : 8002
+  port : 8082
   servlet:
     session:
       tracking-modes: cookie

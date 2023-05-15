@@ -1,7 +1,7 @@
 package com.studygroup.service.email;
 
-import com.studygroup.entity.EmailToken;
+import com.studygroup.entity.Member;
 
 public interface CheckTokenAlreadySent {
-    void checkTokenSentIfSoDelete(Long memberId);
+    void checkTokenSentIfSoDelete(Member member);
 }
