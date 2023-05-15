@@ -1,32 +1,38 @@
 package com.studygroup.util;
 
-import com.studygroup.entity.Member;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.studygroup.enums.Role;
+import com.studygroup.util.constant.LoginExpirationTime;
+import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
+import java.util.*;
 
 public class JwtUtil {
-    private String signingKey ="secret";
+    private static final String signingKey = "secret";
     private static final Logger logger = LoggerFactory
             .getLogger(JwtUtil.class);
 
 
-    public String generateToken(String subject) {
+    public  static String generateToken(String subject, List<SimpleGrantedAuthority> authorities) {
+
+
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
 
+
+
         JwtBuilder builder = Jwts.builder()
+                .setClaims(JwtClaimsUtil.SimpleGrantedListToMap(authorities))
                 .setSubject(subject)
                 .setIssuedAt(now)
+                .setExpiration(
+                        new Date(System.currentTimeMillis() +
+                                LoginExpirationTime.LOGIN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, signingKey);
 
         String token = builder.compact();
@@ -35,34 +41,69 @@ public class JwtUtil {
         return token;
     }
 
-    //check the time also
-    public boolean validateToken(HttpServletRequest httpServletRequest, String jwtTokenCookieName, String signingKey, String token) throws RuntimeException {
+    public static boolean validateToken(String token) {
 
-        if (token == null) {
-            logger.info("There is no token");
-            //this error will be caught by custom exception filter.
-            throw new AuthenticationCredentialsNotFoundException("JWT token is null");
-        }
-        //2. if there is cookie check the cookie with subject name
-        String subject = Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token).getBody().getSubject();
-        String memberId =((Member)SecurityContextHolder.
-                                                        getContext().
-                                                        getAuthentication().
-                                                        getPrincipal()).
-                                                        getId().
-                                                        toString();
-        if(!subject.equals(memberId)){
-            return false;
-        }
-        return true;
+            Jws<Claims> claimsJws = Jwts.parser().
+                    setSigningKey(signingKey).
+                    parseClaimsJws(token);
+
+            return true;
+
     }
 
-//    public boolean invalidateRelatedTokens(HttpServletRequest httpServletRequest,
-//                                           String jwtTokenCookieName)
-//    {
-//
-//
-//
-//
-//    }
+    public static boolean checkTokenIsExpired(String token) {
+        Jws<Claims> claimsJws = Jwts.parser().
+                setSigningKey(signingKey).
+                parseClaimsJws(token);
+
+        Claims claims = claimsJws.getBody();
+
+        Date expiration = claims.getExpiration();
+
+        return !expiration.after(new Date());
+    }
+
+        public static Authentication getAuthenticationFromToken(String token) {
+        Claims claims =
+                Jwts.parser().
+                        setSigningKey(signingKey).
+                        parseClaimsJws(token).
+                        getBody();
+
+        return new UsernamePasswordAuthenticationToken(claims.get("sub"), null, JwtClaimsUtil.ClaimsMapToList(claims));
+    }
+
+
+    public static String refreshToken(String token) {
+
+            long nowMillis = System.currentTimeMillis();
+            Date now = new Date(nowMillis);
+            Claims claims = Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token).getBody();
+
+            return Jwts.builder().
+                    setClaims(claims).
+                    setIssuedAt(now).
+                    setExpiration(
+                            new Date(nowMillis +
+                                    LoginExpirationTime.LOGIN_EXPIRATION_TIME))
+                    .signWith(SignatureAlgorithm.HS256, signingKey).compact();
+        }
+
+
+
+
+    public static void invalidateRelatedTokens(String token)
+    {
+
+        Claims claims = Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token).getBody();
+
+             Jwts.builder().
+                setClaims(claims).
+                setExpiration(
+                        new Date(System.currentTimeMillis()))
+                .signWith(SignatureAlgorithm.HS256, signingKey).compact();
+
+
+    }
+
 }

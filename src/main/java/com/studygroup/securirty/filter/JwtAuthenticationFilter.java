@@ -3,9 +3,9 @@ package com.studygroup.securirty.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studygroup.dto.MemberLoginForm;
 import com.studygroup.entity.Member;
-import com.studygroup.service.user.UserService;
 import com.studygroup.util.CookieUtil;
 import com.studygroup.util.JwtUtil;
+import com.studygroup.util.constant.LoginExpirationTime;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -22,19 +23,16 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @NoArgsConstructor
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private JwtUtil jwtUtil;
     private AuthenticationManager authenticationManager;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, AuthenticationManager authenticationManager, UserService userDetailsService) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
 
-        this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
         setFilterProcessesUrl("/api/login");
         super.setAuthenticationManager(this.authenticationManager);
@@ -44,9 +42,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
+
         log.info("attempt user login authentication");
         ObjectMapper om = new ObjectMapper();
         MemberLoginForm memberLoginForm = null;
+        Authentication authentication = null;
+
 
         try {
             memberLoginForm = om.readValue(request.getInputStream(), MemberLoginForm.class);
@@ -61,7 +62,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                         memberLoginForm.getEmail(),
                         memberLoginForm.getPassword());
 
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+
+             authentication = authenticationManager.authenticate(authenticationToken);
 
         return authentication;
     }
@@ -74,10 +76,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         SecurityContextHolder.getContext().setAuthentication(authResult);
 
         Long MemberId = ((Member)authResult.getPrincipal()).getId();
-        String jwtToken = jwtUtil.generateToken(MemberId.toString());
+        List<SimpleGrantedAuthority> authorities = (List<SimpleGrantedAuthority>) ((Member) authResult.getPrincipal()).getAuthorities();
+        String jwtToken = JwtUtil.generateToken(MemberId.toString(), authorities);
 
-        Cookie cookie = CookieUtil.create("jwtToken", jwtToken, 60*30, "localhost");
+        Cookie cookie = CookieUtil.create("jwtToken", jwtToken, LoginExpirationTime.LOGIN_EXPIRATION_TIME, "localhost");
         response.addCookie(cookie);
+
+        // Write the response to the client
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(new ObjectMapper().writeValueAsString("login is successful"));
 
     }
 
@@ -87,8 +94,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                               AuthenticationException failed)
             throws IOException, ServletException {
         log.info("fail to user authentication");
-
-        setAuthenticationFailureHandler(new CustomAuthenticationFailureHandler());
+        setAuthenticationFailureHandler(new LoginAuthenticationFailureHandler());
         getFailureHandler().onAuthenticationFailure(request, response, failed);
     }
 }

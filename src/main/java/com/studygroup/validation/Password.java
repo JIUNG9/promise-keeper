@@ -1,4 +1,5 @@
-package com.module.validator;
+package com.studygroup.validation;
+
 
 
 import javax.validation.Constraint;
@@ -12,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 
 @Documented
-@Constraint(validatedBy = PasswordValidator.class)
+@Constraint(validatedBy = com.studygroup.validation.PasswordValidator.class)
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
 @Retention(RUNTIME)
 public @interface Password {

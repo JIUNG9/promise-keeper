@@ -1,6 +1,7 @@
 package com.studygroup.util;
 
 import com.studygroup.config.MailConfig;
+import com.studygroup.util.constant.EmailSentURI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +33,7 @@ public class MailSender {
             msg.setSubject(subject, "UTF-8");
 
             msg.setText(
-                    "http://localhost:8080/" + URI + token,
+                    EmailSentURI.DOMAIN + URI + token,
                     "UTF-8");
 
             msg.setRecipients(Message.RecipientType.TO,

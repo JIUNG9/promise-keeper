@@ -8,41 +8,53 @@ import com.studygroup.exception.ApiError;
 import com.studygroup.util.constant.ErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-
-@Component
-public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
-
+public class ExceptionHandlerFilter extends OncePerRequestFilter {
 
     @Override
-    public void onAuthenticationFailure(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            AuthenticationException e)
-            throws IOException, ServletException
-    {
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+
+        String message = null;
+        ErrorCode errorCode = null;
+
+        try {
+            filterChain.doFilter(request, response);
+        }
+        catch (AuthenticationException e) {
+            message  = e.getMessage();
+            errorCode = ErrorCode.AUTHORIZATION_ERROR;
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        }
+        catch (Exception e){
+            message = e.getMessage();
+            errorCode = ErrorCode.AUTHORIZATION_ERROR;
+        }
 
         ResponseEntity responseEntity = ApiError.buildApiError(
                 ApiError.builder().
-                        status(HttpStatus.UNAUTHORIZED).
                         timestamp(LocalDateTime.now()).
-                        message(ErrorCode.LOGIN_FAIL.getMessage()).
+                        status(HttpStatus.UNAUTHORIZED).
+                        message(message).
                         build());
 
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(convertObjectToJson(responseEntity.getBody()));
     }
 
     public String convertObjectToJson(Object object) throws JsonProcessingException {
+
         if (object == null) {
             return null;
         }
@@ -54,5 +66,4 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
     }
-
 }
