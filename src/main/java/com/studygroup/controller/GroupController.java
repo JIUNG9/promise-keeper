@@ -79,7 +79,7 @@ public class GroupController {
     @PostMapping("/api/groups")
     public ResponseEntity<Object> createGroup(@Valid @RequestBody CreateGroupForm createGroupForm)
     {
-        //check why this is null -> parsing error in JwtUtil
+        //JwtUtil parse the token and set the Authentication principle as memberId
         Object memberId = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         logger.info(memberId.toString());
 

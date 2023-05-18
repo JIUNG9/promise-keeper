@@ -3,31 +3,32 @@ package com.studygroup.service.email;
 import com.studygroup.entity.EmailToken;
 import com.studygroup.entity.Member;
 import com.studygroup.enums.TokenType;
+import com.studygroup.exception.CustomIllegalArgumentException;
 import com.studygroup.repository.EmailRepository;
+import com.studygroup.repository.ChatRoomMemberRepository;
 import com.studygroup.repository.UserRepository;
 import com.studygroup.util.constant.ErrorCode;
 import com.studygroup.util.constant.TokenGenerator;
 import com.studygroup.util.lambda.BindParameterSupplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service
+@Service("SaveThePasswordResetToken")
 @RequiredArgsConstructor
-@Qualifier("SaveThePasswordResetToken")
 public class SaveThePasswordResetToken implements SaveTheToken {
 
     private final EmailRepository emailRepo;
-    private final UserRepository userRepo;
 
 
     @Override
-    public String save(Long memberId) {
+    public String save(Member member) {
 
         String token = TokenGenerator.setTokenString();
-        Member member = userRepo.findById(memberId);
+
 
         EmailToken emailToken = EmailToken.
                 builder().
@@ -36,11 +37,8 @@ public class SaveThePasswordResetToken implements SaveTheToken {
                 confirmationToken(token).
                 build();
 
-        Optional.of(
-                emailRepo.save(emailToken)).
-                    orElseThrow(BindParameterSupplier.
-                        bind(IllegalArgumentException::new,
-                                ErrorCode.SAVE_ERROR.getMessage()));
+                emailRepo.save(emailToken);
+
         return token;
 
     }

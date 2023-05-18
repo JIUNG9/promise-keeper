@@ -1,10 +1,15 @@
-package com.module.validator;
+package com.studygroup.validation;
+
+
+
+
+import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.text.MessageFormat;
 
-
+@Component
 public class PasswordValidator implements ConstraintValidator<Password,String> {
     private static final int MIN_SIZE = 8;
     private static final int MAX_SIZE = 50;
@@ -13,11 +18,6 @@ public class PasswordValidator implements ConstraintValidator<Password,String> {
 
     @Override
     public void initialize(Password constraintAnnotation) {
-    }
-
-    public boolean updatePassword(String password){
-        boolean isValidPassword = password.matches(regexPassword);
-        return isValidPassword;
     }
 
     @Override

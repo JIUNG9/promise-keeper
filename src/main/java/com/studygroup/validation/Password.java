@@ -1,5 +1,7 @@
-package com.module.validator;
+package com.studygroup.validation;
 
+
+import com.studygroup.validation.PasswordValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

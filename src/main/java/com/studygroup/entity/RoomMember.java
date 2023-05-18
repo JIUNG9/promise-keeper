@@ -14,6 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name="room_member")
 public class RoomMember extends BaseTimeEntity {
 
     @Id

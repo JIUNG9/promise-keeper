@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Entity
+@Table(name ="chat_room")
 @Builder
 public class ChatRoom extends BaseTimeEntity{
 
