@@ -1,49 +1,49 @@
 package com.studygroup.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
+import javax.persistence.*;
+
+import com.studygroup.enums.Gender;
+import com.studygroup.enums.MainCategory;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.DayOfWeek;
 import java.util.List;
 
 
-enum Gender{
-    male,
-    female;
-}
 
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
 @Entity
-@Data
-public class StudyGroup {
+@Table(name ="study_group")
+public class StudyGroup extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private MainCategory mainCategory;
+
     @Column(length = 256, nullable = false)
     private String subject;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+    @Column(length = 256, nullable = false)
+    private String name;
 
     @Column(length = 256, nullable = false)
-    private String meetingDate;
+    private String info;
 
-    @Column(nullable = false)
-    private int limitMemberNumber;
+    @Builder.Default
+    @OneToMany(mappedBy = "studyGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<GroupMeeting> groupMeetingList = new java.util.ArrayList<>();
 
-    @Temporal(TemporalType.TIME)
-    private java.util.Date meeting_start_time;
-
-    @Temporal(TemporalType.TIME)
-    private java.util.Date meeting_end_time;
-
-    @Column(length = 256, nullable = false)
-    private String intro;
-
-    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true)
-    @JoinColumn
-    private List<StudyGroupMember> studyGroupMemberList;
+    @Builder.Default
+    @OneToMany(mappedBy ="studyGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<StudyGroupMember> studyGroupMemberList = new java.util.ArrayList<>();
 
 
 

@@ -1,21 +1,31 @@
 package com.studygroup.entity;
 
-import jakarta.persistence.*;
+import com.studygroup.enums.Gender;
+import com.studygroup.enums.Role;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-
 @Entity
-@Data
-@NoArgsConstructor
+@Getter
 @Builder
-public class Member extends BaseTimeEntity implements UserDetails {
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "member")
+public class
+Member extends BaseTimeEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,44 +40,70 @@ public class Member extends BaseTimeEntity implements UserDetails {
     @Column(name = "name", length = 45, nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "member", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    private List<EmailToken> emailTokenList;
+    @Column(name = "age", nullable = false)
+    private int  age;
 
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean emailVerified;
 
     @OneToMany(mappedBy = "member")
-    private List<Room> roomList;
+    @Cascade({CascadeType.SAVE_UPDATE, CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<EmailToken> emailTokenList;
+
+    @OneToMany(mappedBy = "member")
+    private List<RoomMember> roomMemberList;
 
     @OneToMany(mappedBy = "member")
     private List<StudyGroupMember> studyGroupMemberList;
 
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (int i = 0; i < Role.values().length; i++) {
+            Role role = Role.values()[i];
+            if (this.getRole().compareTo(role)==0) {
+                authorities.add(new SimpleGrantedAuthority(role.name()));
+            }
+        }
+        return authorities;  }
 
 
     @Override
     public String getUsername() {
-        return null;
+        return this.name;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
+
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return emailVerified;
+    }
+
+    @Override
+    public String toString() {
+        return "The user name is "+ this.name;
     }
 }
