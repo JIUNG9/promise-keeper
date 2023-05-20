@@ -4,8 +4,8 @@ import com.studygroup.entity.StudyGroup;
 import com.studygroup.enums.GroupRole;
 import com.studygroup.exception.*;
 import com.studygroup.securirty.handler.GroupAuthenticationFailureHandler;
-import com.studygroup.service.group.RetrieveGroupByNameService;
-import com.studygroup.service.groupmember.RetrieveGroupMemberByMemberIdAndGroup;
+import com.studygroup.service.group.FindGroupService;
+import com.studygroup.service.groupmember.FindGroupMemberService;
 import com.studygroup.util.GetPathVariableInFilter;
 import com.studygroup.util.constant.ConvertObjectToJson;
 import com.studygroup.util.constant.ErrorCode;
@@ -28,8 +28,8 @@ import java.io.IOException;
 public class GroupAuthorizationFilter extends OncePerRequestFilter {
 
     private final GroupAuthenticationFailureHandler failureHandler;
-    private final RetrieveGroupMemberByMemberIdAndGroup retrieveGroupMemberService;
-    private final RetrieveGroupByNameService retrieveGroupByNameService;
+    private final FindGroupMemberService findGroupMemberService;
+    private final FindGroupService findGroupService ;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -47,8 +47,8 @@ public class GroupAuthorizationFilter extends OncePerRequestFilter {
 
 
         try {
-            StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
-            GroupRole groupRole = retrieveGroupMemberService.get(studyGroup, memberId).getGroupRole();
+            StudyGroup studyGroup = findGroupService.getGroup(groupName);
+            GroupRole groupRole = findGroupMemberService.getGroupMember(studyGroup, memberId).getGroupRole();
             //check the group admin authority
             if (path.contains("/admins")) {
                 if (!groupRole.equals(GroupRole.GROUP_ADMIN)) {

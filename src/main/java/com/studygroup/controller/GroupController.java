@@ -37,7 +37,7 @@ public class GroupController {
     private final DeleteGroupService deleteGroupService;
     private final RetrieveMemberByIdService retrieveMemberByIdService;
     private final RetrieveGroupsBySubjectService retrieveGroupsBySubjectService;
-    private final RetrieveGroupByNameService retrieveGroupByNameService;
+    private final FindGroupService findGroupService;
     private final RetrieveGroupsByCategoryService groupsByCategoryService;
     private final GroupUpdateNameService updateGroupNameService;
     private final CreateGroupService createGroupService;
@@ -51,7 +51,7 @@ public class GroupController {
                            DeleteGroupService deleteGroupService,
                            RetrieveMemberByIdService retrieveMemberByIdService,
                            RetrieveGroupsBySubjectService retrieveGroupsBySubjectService,
-                           RetrieveGroupByNameService retrieveGroupByNameService,
+                           FindGroupService findGroupService,
                            @Qualifier("RetrieveGroupsByCategoryServiceImpl") RetrieveGroupsByCategoryService groupsByCategoryService,
                            GroupUpdateNameService updateGroupNameService,
                            CreateGroupService createGroupService,
@@ -63,7 +63,7 @@ public class GroupController {
         this.deleteGroupService = deleteGroupService;
         this.retrieveMemberByIdService = retrieveMemberByIdService;
         this.retrieveGroupsBySubjectService = retrieveGroupsBySubjectService;
-        this.retrieveGroupByNameService = retrieveGroupByNameService;
+        this.findGroupService = findGroupService;
         this.groupsByCategoryService = groupsByCategoryService;
         this.updateGroupNameService = updateGroupNameService;
         this.createGroupService = createGroupService;
@@ -107,7 +107,7 @@ public class GroupController {
                                                          @PathVariable String groupName,
                                                          @PathVariable String newName) {
 
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         if(!checkGroupNameDuplicationService.isDuplicated(newName)){
             updateGroupNameService.update(studyGroup, newName);
             return ResponseEntity.
@@ -129,8 +129,8 @@ public class GroupController {
                                                   @PathVariable String groupName,
                                                   @Valid @RequestBody UpdateGroupInfoForm updateGroupInfoForm
                                                   ) {
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
-           updateGroupIntroService.update(studyGroup, updateGroupInfoForm.getIntro());
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
+        updateGroupIntroService.update(studyGroup, updateGroupInfoForm.getIntro());
 
             return ResponseEntity.
                     status(HttpStatus.OK).
@@ -151,7 +151,7 @@ public class GroupController {
             groupDtoList = GroupToDto.convert(retrieveAllGroupsService.getAll());
         } else if (name != null) {
             //이름 검색
-            groupDtoList.add(GroupToDto.convert(retrieveGroupByNameService.find(name)));
+            groupDtoList.add(GroupToDto.convert(findGroupService.getGroup(name)));
         } else if(mainCategory != null && subject == null){
             //카테고리 별 검색
             groupDtoList = GroupToDto.convert(groupsByCategoryService.get(mainCategory));
@@ -170,7 +170,7 @@ public class GroupController {
     @DeleteMapping("/api/groups/{groupName}/admins")
     public ResponseEntity<Object> deleteGroup (@PathVariable String groupName) {
 
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         int groupMemberNumber = retrieveTheNumberOfGroupMemberService.getTheNumberOfGroupMember(studyGroup);
         if(groupMemberNumber<=1) {
             deleteGroupService.delete(studyGroup);

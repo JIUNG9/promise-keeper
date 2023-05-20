@@ -7,23 +7,23 @@ import com.studygroup.repository.GroupMemberRepository;
 import com.studygroup.util.constant.ErrorCode;
 import com.studygroup.util.lambda.BindParameterSupplier;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.constraints.pl.REGON;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service
+@Service("FindGroupMemberByNickNameService")
 @RequiredArgsConstructor
-public class RetrieveGroupMemberByNickNameAndGroupServiceImpl implements RetrieveGroupMemberByNickNameAndGroupService {
+public class FindGroupMemberByNickNameService implements FindGroupMemberService {
     private final GroupMemberRepository groupMemberRepository;
+
     @Override
-    public StudyGroupMember get(StudyGroup studyGroup, String nickName) {
+    public StudyGroupMember getGroupMember(StudyGroup studyGroup, Object nickName) {
+        String memberNickName = nickName.toString();
         return Optional.
-                    ofNullable(groupMemberRepository.
-                            findByStudyGroupAndNickName(studyGroup, nickName)).
+                ofNullable(groupMemberRepository.
+                        findByStudyGroupAndNickName(studyGroup, memberNickName)).
                 orElseThrow(BindParameterSupplier.
                         bind(CustomIllegalArgumentException::new,
                                 ErrorCode.YOU_ARE_NOT_GROUP_MEMBER));
-
     }
 }

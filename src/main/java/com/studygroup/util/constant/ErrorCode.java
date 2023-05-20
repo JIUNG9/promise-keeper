@@ -32,7 +32,7 @@ public enum ErrorCode {
     GROUP_IS_NOT_EXISTED_BY_NAME(2002,"The group is not existed by name"),
     GROUP_NAME_IS_DUPLICATED(2003,"The group name is duplicated"),
     CAN_NOT_FIND_WITH_GROUP_NAME_AND_NICK_NAME(2004,"There is no user with that group name and user nickname"),
-    GROUP_MEMBER_IS_NOT_EXISTED(2005,"Group member is not existed in that group"),
+    GROUP_MEMBER_IS_NOT_EXISTED(2005,"The member is not existed in that group"),
     CAN_NOT_DELETE_GROUP(2006, "Can not delete the group, there is a member in group"),
     GROUP_NICK_NAME_IS_DUPLICATED(2007, "The nick name is duplicated use the another one"),
     YOU_ARE_NOW_PENDING_STATUS(2008, "Wait until group admin give you permission"),

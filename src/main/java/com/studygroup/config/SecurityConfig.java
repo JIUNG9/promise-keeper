@@ -6,11 +6,12 @@ import com.studygroup.securirty.handler.LoginAccessDeniedHandler;
 import com.studygroup.securirty.filter.GroupAuthorizationFilter;
 import com.studygroup.securirty.filter.JwtAuthenticationFilter;
 import com.studygroup.securirty.filter.JwtRequestFilter;
-import com.studygroup.service.group.RetrieveGroupByNameService;
-import com.studygroup.service.groupmember.RetrieveGroupMemberByMemberIdAndGroup;
-import com.studygroup.service.user.CustomAuthenticationService;
+import com.studygroup.service.group.FindGroupService;
+import com.studygroup.service.groupmember.FindGroupMemberService;
+import com.studygroup.service.user.UserAuthenticationService;
 import com.studygroup.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -25,16 +26,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
-    @Lazy
-    private final CustomAuthenticationService userService;
-    private final RetrieveGroupMemberByMemberIdAndGroup retrieveGroupMemberByMemberIdAndGroupName;
-    private final RetrieveGroupByNameService retrieveGroupByNameService;
+    private  UserAuthenticationService userService;
+    private  FindGroupMemberService findGroupMemberService;
+    private  FindGroupService findGroupService;
+
+    public SecurityConfig(UserAuthenticationService userService,
+                          @Qualifier("FindGroupMemberByIdService") FindGroupMemberService findGroupMemberService,
+                          FindGroupService findGroupService) {
+        this.userService = userService;
+        this.findGroupMemberService = findGroupMemberService;
+        this.findGroupService = findGroupService;
+    }
 
     @Bean
     GroupAuthenticationFailureHandler groupAuthenticationFailureHandler(){
@@ -98,7 +105,7 @@ public class SecurityConfig {
 
         http.addFilterAt(new JwtAuthenticationFilter(defaultAuthenticationManager()), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAfter(new JwtRequestFilter(jwtUtil()), JwtAuthenticationFilter.class);
-        http.addFilterAfter(new GroupAuthorizationFilter(groupAuthenticationFailureHandler(), retrieveGroupMemberByMemberIdAndGroupName, retrieveGroupByNameService),JwtRequestFilter.class);
+        http.addFilterAfter(new GroupAuthorizationFilter(groupAuthenticationFailureHandler(), findGroupMemberService, findGroupService),JwtRequestFilter.class);
         return http.build();
     }
 

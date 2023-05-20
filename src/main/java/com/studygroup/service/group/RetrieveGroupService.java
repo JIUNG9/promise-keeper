@@ -12,10 +12,10 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class RetrieveGroupByNameServiceImpl implements RetrieveGroupByNameService {
+public class RetrieveGroupService implements FindGroupService {
     private final GroupRepository groupRepository;
     @Override
-    public StudyGroup find(String groupName) {
+    public StudyGroup getGroup(String groupName) {
         return Optional.
                     ofNullable(groupRepository.findByName(groupName)).
                     orElseThrow(BindParameterSupplier.

@@ -1,4 +1,4 @@
-package com.studygroup.service;
+package com.studygroup.service.groupmember;
 
 import com.studygroup.entity.StudyGroupMember;
 import com.studygroup.enums.GroupMemberApplicationConSentOrDeny;
