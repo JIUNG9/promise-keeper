@@ -4,6 +4,8 @@ import javax.persistence.*;
 
 import lombok.*;
 
+import java.time.LocalTime;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -16,11 +18,17 @@ public class StudyGroupMemberPlan extends BaseTimeEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Temporal(TemporalType.TIME)
-    private java.util.Date date;
+    @Temporal(TemporalType.DATE)
+    private java.util.Date startDate;
+
+    @Temporal(TemporalType.DATE)
+    private java.util.Date endDate;
 
     @Temporal(TemporalType.TIME)
-    private java.util.Date time;
+    private LocalTime startTime;
+
+    @Temporal(TemporalType.TIME)
+    private LocalTime endTime;
 
     @Column(columnDefinition = "boolean default false", nullable = false)
     private boolean is_achieved;

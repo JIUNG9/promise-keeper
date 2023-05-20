@@ -3,6 +3,7 @@ package com.studygroup.service.groupmember;
 import com.studygroup.entity.StudyGroup;
 import com.studygroup.entity.StudyGroupMember;
 import com.studygroup.exception.CustomIllegalArgumentException;
+import com.studygroup.exception.GroupMemberAuthorizationException;
 import com.studygroup.repository.GroupMemberRepository;
 import com.studygroup.util.constant.ErrorCode;
 import com.studygroup.util.lambda.BindParameterSupplier;
@@ -20,5 +21,5 @@ public class RetrieveGroupMemberByMemberIdAndGroupImpl implements RetrieveGroupM
         return Optional.
                 ofNullable(groupMemberRepository.findByStudyGroupAndMember_Id(studyGroup, memberId)).
                 orElseThrow(BindParameterSupplier.
-                        bind(CustomIllegalArgumentException::new, ErrorCode.GROUP_MEMBER_IS_NOT_EXISTED));    }
+                        bind(GroupMemberAuthorizationException::new, ErrorCode.YOU_ARE_NOT_GROUP_MEMBER.getMessage()));    }
 }

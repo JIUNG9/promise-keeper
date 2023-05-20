@@ -23,7 +23,7 @@ public class RetrieveGroupMemberByNickNameAndGroupServiceImpl implements Retriev
                             findByStudyGroupAndNickName(studyGroup, nickName)).
                 orElseThrow(BindParameterSupplier.
                         bind(CustomIllegalArgumentException::new,
-                                ErrorCode.GROUP_MEMBER_IS_NOT_EXISTED));
+                                ErrorCode.YOU_ARE_NOT_GROUP_MEMBER));
 
     }
 }
