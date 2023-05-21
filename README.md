@@ -15,12 +15,16 @@
 
 ## ERD
 <img width="727" alt="image" src="https://github.com/JIUNG9/study-group-meeting/assets/60885635/6a613099-cb1f-452d-b4ba-1b3427adfa6c">
+
 ## Docs
+
 ### API Docs
 https://tiny-coal-4fe.notion.site/1f046b4c563940d8bcda97b6e46c5c0c?v=6c53561d4d6d4c028f03215497742e51
+
 ### 요구명세서 
 https://tiny-coal-4fe.notion.site/SRS-e13c387757ec4680803091fa260626aa
 ### 설계명세서
 https://tiny-coal-4fe.notion.site/6c900d35344249b589216a2c5be208e7
+
 ### Object sequence
 https://tiny-coal-4fe.notion.site/Object-sequence-f90c6338f2e14cbbae65c8583dadcd94
