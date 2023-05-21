@@ -1,4 +1,4 @@
-# student-group-matching
+# student-group-meeting
 #### 문제 제시 : 😅
 #### 문제 접근 :
 #### 해결 방법 : 👍🏻
