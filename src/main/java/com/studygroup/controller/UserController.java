@@ -2,6 +2,7 @@ package com.studygroup.controller;
 
 import com.studygroup.dto.MemberSignUpForm;
 
+import com.studygroup.dto.MyInfoDto;
 import com.studygroup.dto.PasswordUpdateForm;
 import com.studygroup.entity.Member;
 import com.studygroup.exception.ApiError;
@@ -44,6 +45,7 @@ public class UserController {
     private final UpdateUserPasswordService updatePasswordService;
     private final VerifyTheTokenService verifyUserValidateToken;
     private final VerifyTheTokenService verifyPasswordResetToken;
+    private final GetMyInformationService getMyInformationService;
     private final SignUpService signUpService;
     private final LogoutService logoutService;
     private static final Logger logger = LoggerFactory
@@ -53,16 +55,16 @@ public class UserController {
             @Qualifier("UserKickService") UserRemovalService withdrawalUserAsAdminService,
             @Qualifier("UserDeletionService") UserRemovalService userDeletionService,
             @Qualifier("CheckEmailDuplicationService") CheckDuplicationService checkEmailDuplicationService,
-            @Qualifier("RetrieveMemberByVerificationTokenService")RetrieveMemberByToken retrieveMemberByVerificationTokenService,
-            @Qualifier("RetrieveMemberServiceByPasswordResetTokenService")RetrieveMemberByToken retrieveMemberServiceByPasswordResetTokenService,
-                          RetrieveMemberByIdService retrieveMemberByIdService,
+            @Qualifier("RetrieveMemberByVerificationTokenService") RetrieveMemberByToken retrieveMemberByVerificationTokenService,
+            @Qualifier("RetrieveMemberServiceByPasswordResetTokenService") RetrieveMemberByToken retrieveMemberServiceByPasswordResetTokenService,
+            RetrieveMemberByIdService retrieveMemberByIdService,
             @Qualifier("RetrieveMemberByEmailService") RetrieveMemberByEmail retrieveMemberByEmailService,
-                          UpdateUserIsEnableService updateUserIsEnableService,
-            @Qualifier("UpdatePasswordService")UpdateUserPasswordService updatePasswordService,
-            @Qualifier("VerifyUserValidateTokenService")VerifyTheTokenService verifyUserValidateToken,
-            @Qualifier("VerifyPasswordResetTokenService")VerifyTheTokenService verifyPasswordResetToken,
-                          SignUpService signUpService,
-                          LogoutService logoutService) {
+            UpdateUserIsEnableService updateUserIsEnableService,
+            @Qualifier("UpdatePasswordService") UpdateUserPasswordService updatePasswordService,
+            @Qualifier("VerifyUserValidateTokenService") VerifyTheTokenService verifyUserValidateToken,
+            @Qualifier("VerifyPasswordResetTokenService") VerifyTheTokenService verifyPasswordResetToken,
+            GetMyInformationService getMyInformationService, SignUpService signUpService,
+            LogoutService logoutService) {
         this.withdrawalUserAsAdminService = withdrawalUserAsAdminService;
         this.checkEmailDuplicationService = checkEmailDuplicationService;
         this.userDeletionService = userDeletionService;
@@ -74,6 +76,7 @@ public class UserController {
         this.updatePasswordService = updatePasswordService;
         this.verifyUserValidateToken = verifyUserValidateToken;
         this.verifyPasswordResetToken = verifyPasswordResetToken;
+        this.getMyInformationService = getMyInformationService;
         this.signUpService = signUpService;
         this.logoutService = logoutService;
     }
@@ -209,6 +212,19 @@ public class UserController {
                 body("update password is succeeded ");
 
     }
+
+    @GetMapping("/api/users/info")
+    public ResponseEntity<Object> updatePassword(@AuthenticationPrincipal Object memberId) {
+
+        Member member = retrieveMemberByIdService.getMember(ObjectToLong.convert(memberId));
+        MyInfoDto myInfoDto = getMyInformationService.getMyInfo(member);
+        return ResponseEntity.
+                status(HttpStatus.OK).
+                body(myInfoDto);
+
+    }
+
+
 
     @DeleteMapping("/api/users/info/{email}")
     public ResponseEntity<Object> withdrawalUserSelf(@AuthenticationPrincipal Object memberId,

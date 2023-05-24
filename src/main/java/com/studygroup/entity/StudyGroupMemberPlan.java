@@ -24,10 +24,8 @@ public class StudyGroupMemberPlan extends BaseTimeEntity{
     @Temporal(TemporalType.DATE)
     private java.util.Date endDate;
 
-    @Temporal(TemporalType.TIME)
     private LocalTime startTime;
 
-    @Temporal(TemporalType.TIME)
     private LocalTime endTime;
 
     @Column(columnDefinition = "boolean default false", nullable = false)

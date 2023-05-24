@@ -3,25 +3,18 @@ package com.studygroup.controller;
 
 
 import com.studygroup.service.chatroom.CheckUserIsInChatRoomService;
-import com.studygroup.service.chatroom.CheckUserIsInLiveMeetingRoomService;
 import com.studygroup.util.WebcamUtils;
+import com.studygroup.util.constant.SendVideoSocketConstant;
 import com.studygroup.util.constant.ErrorCode;
-import com.studygroup.util.constant.ObjectToLong;
-import com.studygroup.util.constant.ServerUrl;
-import lombok.RequiredArgsConstructor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.validation.Valid;
-import java.util.UUID;
 
 @Controller
 public class LiveMeetingController {
@@ -35,29 +28,22 @@ public class LiveMeetingController {
     private static final Logger logger = LoggerFactory
             .getLogger(LiveMeetingController.class);
 
-    @PostMapping("/api/user/{groupName}/{roomId}/live-meeting")
-    public ResponseEntity<Object> sendWebCamVideoData(@AuthenticationPrincipal Object memberId,
-                                                      @PathVariable String groupName,
-                                                      @PathVariable UUID roomId
-                                                      ) {
+    //    @PostMapping("/api/users/{groupName}/{roomId}/live-meeting")
+    @PostMapping("/api/test")
+    public ResponseEntity<Object> sendWebCamVideoData(@AuthenticationPrincipal Object memberId
+//                                                      @PathVariable String groupName,
+//                                                      @PathVariable UUID roomId
+    ) {
 
+        WebcamUtils.startSendingVideo(SendVideoSocketConstant.DOMAIN
+                + SendVideoSocketConstant.WEB_SOCKET_END_POINT);
+        logger.info("can't access web cam data");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorCode.CAN_NOT_ACCESS_WEB_CAM);
 
-        boolean userIsInChatRoom = checkUserIsInLiveMeetingRoomService.
-                check(ObjectToLong.convert(memberId), roomId);
+//            return ResponseEntity.status(HttpStatus.OK).body("successfully send web camera video data to server");
 
-        if (userIsInChatRoom) {
-            logger.info("user is in the chat room");
-            if (!WebcamUtils.sendWebcamVideo
-                    (ServerUrl.FLASK_SERVER_URL + ServerUrl.SEND_WEB_CAM_DATA_URL,
-                            ObjectToLong.convert(memberId),
-                            roomId)) {
-                logger.info("can't access web cam data");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorCode.CAN_NOT_ACCESS_WEB_CAM);
-            }
-            return ResponseEntity.status(HttpStatus.OK).body("successfully send web camera video data to server");
-
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorCode.USER_IS_NOT_IN_CHAT_ROOM);
+//        }
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorCode.USER_IS_NOT_IN_CHAT_ROOM);
 
     }
 }

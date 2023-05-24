@@ -1,89 +1,86 @@
 package com.studygroup.util;
 
-import org.opencv.core.Core;
+import com.github.sarxos.webcam.Webcam;
+import com.studygroup.config.VideoSocketHandler;
+import lombok.extern.java.Log;
+import nu.pattern.OpenCV;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.UUID;
+import java.awt.image.DataBufferByte;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Base64;
+import java.util.concurrent.ExecutionException;
 
 
+@Log
 public class WebcamUtils {
-    static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-    }
 
-    public static boolean sendWebcamVideo(String url, Long userId, UUID roomId) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        VideoCapture camera = new VideoCapture(0);
-        Mat frame = new Mat();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    private static volatile boolean isSending = false;
 
-        if (!camera.isOpened()) {
-            System.out.println("Failed to open camera!");
-            return false;
-        }
 
-        while (true) {
-            camera.read(frame);
-            if (!frame.empty()) {
-                try {
-                    BufferedImage image = matToBufferedImage(frame);
-                    ImageIO.write(image, "jpg", outputStream);
-                    byte[] bytes = outputStream.toByteArray();
-                    ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-                    ByteArrayResource videoFile = new ByteArrayResource(bytes) {
-                        @Override
-                        public String getFilename() {
-                            return "frame.jpg";
-                        }
-                    };
-                    body.add("file", videoFile);
-                    body.add("userId", userId);
-                    body.add("roomId", roomId);
+    public static void startSendingVideo(String url) {
+        WebSocketClient client = new StandardWebSocketClient();
+        isSending = true;
 
-                    HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-                    ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
-                    body.clear();
-                    outputStream.reset();
-                    inputStream.close();
-                } catch (IOException e) {
-                    System.out.println("Failed to send video frame: " + e.getMessage());
-                }
-            } else {
-                System.out.println("Failed to capture video frame!");
+        try {
+            URI uri = new URI(url);
+            WebSocketSession session = client.doHandshake(new VideoSocketHandler(), null, uri).get();
+
+            OpenCV.loadLocally();
+            VideoCapture vc = new VideoCapture(0);
+            log.info(String.valueOf(vc.isOpened()));
+            Mat frame = new Mat();
+
+//            while (isSending) {
+            while(session.isOpen()) {
+//                vc.read(frame);  // Move this line here to continuously read new frames
+//                BufferedImage image = matToBufferedImage(frame);
+//                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//                ImageIO.write(image, "jpg", outputStream);
+//                byte[] bytes = outputStream.toByteArray();
+//                String messageStr = Base64.getEncoder().encodeToString(bytes);
+                TextMessage message = new TextMessage("hello");
+                session.sendMessage(message);
+//            }
+//            vc.release();
+//            session.close();
             }
+
+        } catch (URISyntaxException | InterruptedException | ExecutionException | IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private static BufferedImage matToBufferedImage(Mat mat) {
-        byte[] data = new byte[mat.cols() * mat.rows() * (int) mat.elemSize()];
-        mat.get(0, 0, data);
-        int type = mat.channels() == 1 ? BufferedImage.TYPE_BYTE_GRAY : BufferedImage.TYPE_3BYTE_BGR;
-        if (type == BufferedImage.TYPE_3BYTE_BGR) {
-            for (int i = 0; i < data.length; i += 3) {
-                byte blue = data[i];
-                data[i] = data[i + 2];
-                data[i + 2] = blue;
-            }
+    public static void stopSendingVideo() {
+        isSending = false;
+    }
+
+    private static BufferedImage matToBufferedImage(Mat matrix) {
+        int type = BufferedImage.TYPE_BYTE_GRAY;
+        if (matrix.channels() > 1) {
+            Mat m = new Mat();
+            Imgproc.cvtColor(matrix, m, Imgproc.COLOR_BGR2RGB);
+            type = BufferedImage.TYPE_3BYTE_BGR;
+            matrix = m;
         }
-        BufferedImage image = new BufferedImage(mat.cols(), mat.rows(), type);
-        image.getRaster().setDataElements(0, 0, mat.cols(), mat.rows(), data);
+        int bufferSize = matrix.channels() * matrix.cols() * matrix.rows();
+        byte[] buffer = new byte[bufferSize];
+        matrix.get(0, 0, buffer); // get all the pixels
+        BufferedImage image = new BufferedImage(matrix.cols(), matrix.rows(), type);
+        final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        System.arraycopy(buffer, 0, targetPixels, 0, buffer.length);
+
         return image;
     }
 }
+

@@ -13,6 +13,9 @@ import java.util.List;
 public interface GroupMemberRepository extends JpaRepository<StudyGroupMember, Integer> {
 
     int countByStudyGroup(StudyGroup studyGroup);
+
+    List<StudyGroupMember> findByMember(Member member);
+    List<StudyGroupMember> findByMember_Id(Long memberId);
     List<StudyGroupMember> findByStudyGroup(StudyGroup studyGroup);
     StudyGroupMember findByStudyGroupAndNickName(StudyGroup studyGroup, String nickName);
     StudyGroupMember findByStudyGroupAndMember_Id(StudyGroup studyGroup,Long memberId);
