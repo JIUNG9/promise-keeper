@@ -35,8 +35,7 @@ public class GroupMeeting {
     @OneToMany(mappedBy = "groupMeeting", cascade = CascadeType.REMOVE)
     private List<MeetingDay> dayOfWeekList = new java.util.ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)    @JoinColumn
     private StudyGroup studyGroup;
 
 }

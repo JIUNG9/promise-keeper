@@ -31,7 +31,6 @@ public class StudyGroupMemberPlan extends BaseTimeEntity{
     @Column(columnDefinition = "boolean default false", nullable = false)
     private boolean is_achieved;
 
-    @ManyToOne
-    @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)    @JoinColumn
     private StudyGroupMember studyGroupMember;
 }

@@ -25,7 +25,7 @@ public class EmailToken extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private TokenType tokenType;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
     private Member member;
 

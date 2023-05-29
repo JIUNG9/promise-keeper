@@ -21,7 +21,7 @@ public class MeetingDay {
     @Column(name = "day_of_week")
     private java.time.DayOfWeek dayOfWeek;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn
     private GroupMeeting groupMeeting;
 }
