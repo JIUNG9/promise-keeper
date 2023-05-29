@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service("RetrieveMemberByIdService")
 @RequiredArgsConstructor
-public class RetrieveMemberByIdServiceImpl implements RetrieveMemberByIdService {
+public class RetrieveMemberByAuthPrincipleImpl implements RetrieveMemberByAuthPrinciple {
 
     private final UserRepository userRepository;
 

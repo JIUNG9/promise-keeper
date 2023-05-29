@@ -1,4 +1,4 @@
-package com.studygroup.util.constant;
+package com.studygroup.util;
 
 public class ObjectToLong
 {

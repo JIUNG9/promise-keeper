@@ -7,5 +7,5 @@ import java.util.List;
 
 @Service
 public interface RetrieveGroupsBySubjectService {
-    public List<StudyGroup> find(String subject);
+    public List<StudyGroup> get(String subject);
 }

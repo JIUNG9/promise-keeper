@@ -20,7 +20,7 @@ import com.studygroup.util.JwtUtil;
 import com.studygroup.util.RandomPasswordGenerator;
 import com.studygroup.util.constant.ErrorCode;
 import com.studygroup.util.constant.LoginExpirationTime;
-import com.studygroup.util.constant.ObjectToLong;
+import com.studygroup.util.ObjectToLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class UserController {
     private final UserRemovalService userDeletionService;
     private final RetrieveMemberByToken retrieveMemberByVerificationTokenService;
     private final RetrieveMemberByToken retrieveMemberServiceByPasswordResetTokenService;
-    private final RetrieveMemberByIdService retrieveMemberByIdService;
+    private final RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple;
     private final RetrieveMemberByEmail retrieveMemberByEmailService;
     private final UpdateUserIsEnableService updateUserIsEnableService;
     private final UpdateUserPasswordService updatePasswordService;
@@ -57,7 +57,7 @@ public class UserController {
             @Qualifier("CheckEmailDuplicationService") CheckDuplicationService checkEmailDuplicationService,
             @Qualifier("RetrieveMemberByVerificationTokenService") RetrieveMemberByToken retrieveMemberByVerificationTokenService,
             @Qualifier("RetrieveMemberServiceByPasswordResetTokenService") RetrieveMemberByToken retrieveMemberServiceByPasswordResetTokenService,
-            RetrieveMemberByIdService retrieveMemberByIdService,
+            RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple,
             @Qualifier("RetrieveMemberByEmailService") RetrieveMemberByEmail retrieveMemberByEmailService,
             UpdateUserIsEnableService updateUserIsEnableService,
             @Qualifier("UpdatePasswordService") UpdateUserPasswordService updatePasswordService,
@@ -70,7 +70,7 @@ public class UserController {
         this.userDeletionService = userDeletionService;
         this.retrieveMemberByVerificationTokenService = retrieveMemberByVerificationTokenService;
         this.retrieveMemberServiceByPasswordResetTokenService = retrieveMemberServiceByPasswordResetTokenService;
-        this.retrieveMemberByIdService = retrieveMemberByIdService;
+        this.retrieveMemberByAuthPrinciple = retrieveMemberByAuthPrinciple;
         this.retrieveMemberByEmailService = retrieveMemberByEmailService;
         this.updateUserIsEnableService = updateUserIsEnableService;
         this.updatePasswordService = updatePasswordService;
@@ -204,7 +204,7 @@ public class UserController {
     public ResponseEntity<Object> updatePassword(@AuthenticationPrincipal Object memberId,
                                                  @RequestBody @Valid PasswordUpdateForm passwordUpdateForm) {
 
-            Member member = retrieveMemberByIdService.getMember(ObjectToLong.convert(memberId));
+            Member member = retrieveMemberByAuthPrinciple.getMember(ObjectToLong.convert(memberId));
             updatePasswordService.update(member, passwordUpdateForm.getPassword());
 
         return ResponseEntity.
@@ -216,7 +216,7 @@ public class UserController {
     @GetMapping("/api/users/info")
     public ResponseEntity<Object> updatePassword(@AuthenticationPrincipal Object memberId) {
 
-        Member member = retrieveMemberByIdService.getMember(ObjectToLong.convert(memberId));
+        Member member = retrieveMemberByAuthPrinciple.getMember(ObjectToLong.convert(memberId));
         MyInfoDto myInfoDto = getMyInformationService.getMyInfo(member);
         return ResponseEntity.
                 status(HttpStatus.OK).
@@ -247,7 +247,7 @@ public class UserController {
     @DeleteMapping("/api/admins/{userId}")
     public ResponseEntity<Object> kickUserAsAdmin(@PathVariable Long userId) {
 
-        Member member = retrieveMemberByIdService.getMember(userId);
+        Member member = retrieveMemberByAuthPrinciple.getMember(userId);
         logger.info(member.toString());
 
         withdrawalUserAsAdminService.removeUser(member);

@@ -10,11 +10,11 @@ import com.studygroup.service.CheckDuplicationService;
 import com.studygroup.service.group.*;
 import com.studygroup.service.groupmember.ApplyTheGroupService;
 import com.studygroup.service.groupmember.RetrieveTheNumberOfGroupMemberService;
-import com.studygroup.service.user.RetrieveMemberByIdService;
+import com.studygroup.service.user.RetrieveMemberByAuthPrinciple;
 import com.studygroup.util.GroupToDto;
 import com.studygroup.util.constant.ErrorCode;
 import com.studygroup.util.constant.GroupAdminIntro;
-import com.studygroup.util.constant.ObjectToLong;
+import com.studygroup.util.ObjectToLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,10 +35,10 @@ public class GroupController {
     private final RetrieveTheNumberOfGroupMemberService retrieveTheNumberOfGroupMemberService;
     private final RetrieveAllGroupsService retrieveAllGroupsService;
     private final DeleteGroupService deleteGroupService;
-    private final RetrieveMemberByIdService retrieveMemberByIdService;
+    private final RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple;
     private final RetrieveGroupsBySubjectService retrieveGroupsBySubjectService;
     private final FindGroupService findGroupService;
-    private final RetrieveGroupsByCategoryService groupsByCategoryService;
+    private final RetrieveGroupsByCategoryService retrieveGroupsByCategoryService;
     private final GroupUpdateNameService updateGroupNameService;
     private final CreateGroupService createGroupService;
     private final CheckDuplicationService checkGroupNameDuplicationService;
@@ -49,10 +49,10 @@ public class GroupController {
     public GroupController(UpdateGroupIntroService updateGroupIntroService, RetrieveTheNumberOfGroupMemberService retrieveTheNumberOfGroupMemberService,
                            RetrieveAllGroupsService retrieveAllGroupsService,
                            DeleteGroupService deleteGroupService,
-                           RetrieveMemberByIdService retrieveMemberByIdService,
+                           RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple,
                            RetrieveGroupsBySubjectService retrieveGroupsBySubjectService,
                            FindGroupService findGroupService,
-                           @Qualifier("RetrieveGroupsByCategoryServiceImpl") RetrieveGroupsByCategoryService groupsByCategoryService,
+                           @Qualifier("RetrieveGroupsByCategoryServiceImpl") RetrieveGroupsByCategoryService retrieveGroupsByCategoryService,
                            GroupUpdateNameService updateGroupNameService,
                            CreateGroupService createGroupService,
                            @Qualifier("CheckGroupNameDuplicationService") CheckDuplicationService checkGroupNameDuplicationService,
@@ -61,10 +61,10 @@ public class GroupController {
         this.retrieveTheNumberOfGroupMemberService = retrieveTheNumberOfGroupMemberService;
         this.retrieveAllGroupsService = retrieveAllGroupsService;
         this.deleteGroupService = deleteGroupService;
-        this.retrieveMemberByIdService = retrieveMemberByIdService;
+        this.retrieveMemberByAuthPrinciple = retrieveMemberByAuthPrinciple;
         this.retrieveGroupsBySubjectService = retrieveGroupsBySubjectService;
         this.findGroupService = findGroupService;
-        this.groupsByCategoryService = groupsByCategoryService;
+        this.retrieveGroupsByCategoryService = retrieveGroupsByCategoryService;
         this.updateGroupNameService = updateGroupNameService;
         this.createGroupService = createGroupService;
         this.checkGroupNameDuplicationService = checkGroupNameDuplicationService;
@@ -86,7 +86,7 @@ public class GroupController {
         if(!checkGroupNameDuplicationService.isDuplicated(createGroupForm.getName())){
             StudyGroup studyGroup = createGroupService.create(createGroupForm);
             initialGroupMemberAsAdminService.apply(
-                    retrieveMemberByIdService.getMember(ObjectToLong.convert(memberId)),
+                    retrieveMemberByAuthPrinciple.getMember(ObjectToLong.convert(memberId)),
                             studyGroup, createGroupForm.getNickName(),
                             GroupAdminIntro.INTRO_AS_ADMIN);
 
@@ -154,11 +154,11 @@ public class GroupController {
             groupDtoList.add(GroupToDto.convert(findGroupService.getGroup(name)));
         } else if(mainCategory != null && subject == null){
             //카테고리 별 검색
-            groupDtoList = GroupToDto.convert(groupsByCategoryService.get(mainCategory));
+            groupDtoList = GroupToDto.convert(retrieveGroupsByCategoryService.get(mainCategory));
         }
         else{
             //주제 검색
-            groupDtoList = GroupToDto.convert(retrieveGroupsBySubjectService.find(subject));
+            groupDtoList = GroupToDto.convert(retrieveGroupsBySubjectService.get(subject));
         }
 
         if(groupDtoList.isEmpty()){

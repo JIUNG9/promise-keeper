@@ -41,7 +41,7 @@ public class StudyGroupMember extends BaseTimeEntity{
     @JoinColumn
     private StudyGroup studyGroup;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
     private Member member;
 

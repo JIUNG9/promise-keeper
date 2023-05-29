@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class RetrieveGroupService implements FindGroupService {
+public class FindGroupByNameService implements FindGroupService {
     private final GroupRepository groupRepository;
     @Override
     public StudyGroup getGroup(String groupName) {
@@ -21,5 +21,6 @@ public class RetrieveGroupService implements FindGroupService {
                     orElseThrow(BindParameterSupplier.
                         bind(CustomIllegalArgumentException::new,
                         ErrorCode.GROUP_IS_NOT_EXISTED_BY_NAME));
+
     }
 }

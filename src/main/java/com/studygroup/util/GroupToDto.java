@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 public class GroupToDto {
 
     public static List<GroupDto> convert(List<StudyGroup> studyGroupList){
-        List<GroupToDto> groupToDtoList = new ArrayList<>();
        return studyGroupList.stream().map(GroupToDto::convert).collect(Collectors.toList());
     }
 
@@ -19,6 +18,7 @@ public class GroupToDto {
         return GroupDto.
                     builder().
                         intro(studyGroup.getInfo()).
+                        theNumberOfMember(studyGroup.getStudyGroupMemberList().size()).
                         mainCategory(studyGroup.getMainCategory()).
                         name(studyGroup.getName()).
                         subject(studyGroup.getSubject()).

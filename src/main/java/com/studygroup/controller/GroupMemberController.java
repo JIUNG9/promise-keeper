@@ -12,9 +12,9 @@ import com.studygroup.service.groupmember.CheckGroupMemberIsPendingService;
 import com.studygroup.service.groupmember.HandleGroupMemberApplicationService;
 import com.studygroup.service.group.FindGroupService;
 import com.studygroup.service.groupmember.*;
-import com.studygroup.service.user.RetrieveMemberByIdService;
+import com.studygroup.service.user.RetrieveMemberByAuthPrinciple;
 import com.studygroup.util.constant.ErrorCode;
-import com.studygroup.util.constant.ObjectToLong;
+import com.studygroup.util.ObjectToLong;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +37,7 @@ public class GroupMemberController {
     private final TakeOverGroupAdminService takeOverGroupAdminService;
     private final HandleGroupMemberApplicationService handleGroupMemberApplicationService;
     private final RetrieveGroupMembersApplicationService retrieveGroupMembersApplication;
-    private final RetrieveMemberByIdService retrieveMemberByIdService;
+    private final RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple;
     private final ApplyTheGroupService applyTheGroupService;
     private final CheckGroupMemberNickNameIsDuplicatedService checkGroupMemberNickNameIsDuplicatedService;
     private final FindGroupService findGroupService;
@@ -52,7 +52,7 @@ public class GroupMemberController {
                                  @Qualifier("FindGroupMemberByIdService")FindGroupMemberService findGroupMemberByIdService,
                                  @Qualifier("FindGroupMemberByNickNameService") FindGroupMemberService findGroupMemberByNickNameService,
                                  @Qualifier("RetrieveGroupMembersApplicationServiceImpl") RetrieveGroupMembersApplicationService retrieveGroupMembersApplication,
-                                 RetrieveMemberByIdService retrieveMemberByIdService,
+                                 RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple,
                                  @Qualifier("ApplyTheGroupServiceAsMember") ApplyTheGroupService applyTheGroupService,
                                  CheckGroupMemberNickNameIsDuplicatedService checkGroupMemberNickNameIsDuplicatedService,
                                  FindGroupService findGroupService) {
@@ -66,7 +66,7 @@ public class GroupMemberController {
         this.findGroupMemberByNickNameService = findGroupMemberByNickNameService;
         this.findGroupMemberByIdService = findGroupMemberByIdService;
         this.retrieveGroupMembersApplication = retrieveGroupMembersApplication;
-        this.retrieveMemberByIdService = retrieveMemberByIdService;
+        this.retrieveMemberByAuthPrinciple = retrieveMemberByAuthPrinciple;
         this.applyTheGroupService = applyTheGroupService;
         this.checkGroupMemberNickNameIsDuplicatedService = checkGroupMemberNickNameIsDuplicatedService;
         this.findGroupService = findGroupService;
@@ -96,7 +96,7 @@ public class GroupMemberController {
         }
             if (!checkGroupMemberNickNameIsDuplicatedService.
                     isDuplicated(studyGroup, groupApplicationForm.getNickName())) {
-                Member member = retrieveMemberByIdService.getMember(ObjectToLong.convert(memberId));
+                Member member = retrieveMemberByAuthPrinciple.getMember(ObjectToLong.convert(memberId));
                 applyTheGroupService.apply(
                         member,
                         studyGroup,

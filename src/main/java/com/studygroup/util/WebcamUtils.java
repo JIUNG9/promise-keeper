@@ -1,12 +1,15 @@
 package com.studygroup.util;
 
-import com.github.sarxos.webcam.Webcam;
 import com.studygroup.config.VideoSocketHandler;
 import lombok.extern.java.Log;
 import nu.pattern.OpenCV;
+import org.apache.logging.log4j.message.SimpleMessage;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
@@ -39,22 +42,20 @@ public class WebcamUtils {
             OpenCV.loadLocally();
             VideoCapture vc = new VideoCapture(0);
             log.info(String.valueOf(vc.isOpened()));
-            Mat frame = new Mat();
+            Mat frame = new Mat(1000,1000,1000);
 
-//            while (isSending) {
-            while(session.isOpen()) {
-//                vc.read(frame);  // Move this line here to continuously read new frames
-//                BufferedImage image = matToBufferedImage(frame);
-//                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//                ImageIO.write(image, "jpg", outputStream);
-//                byte[] bytes = outputStream.toByteArray();
-//                String messageStr = Base64.getEncoder().encodeToString(bytes);
-                TextMessage message = new TextMessage("hello");
-                session.sendMessage(message);
-//            }
-//            vc.release();
-//            session.close();
+            while (isSending) {
+                vc.read(frame);
+                BufferedImage image = matToBufferedImage(frame);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                ImageIO.write(image, "jpg", outputStream);
+                byte[] bytes = outputStream.toByteArray();
+                BinaryMessage binaryMessage = new BinaryMessage(bytes);
+                session.sendMessage(binaryMessage);
             }
+            vc.release();
+            session.close();
+
 
         } catch (URISyntaxException | InterruptedException | ExecutionException | IOException e) {
             e.printStackTrace();

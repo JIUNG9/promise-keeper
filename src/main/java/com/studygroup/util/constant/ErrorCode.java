@@ -56,8 +56,10 @@ public enum ErrorCode {
     CAN_NOT_ACCESS_WEB_CAM(6000, "can not access the web cam, plz grant the authority website can access the camera"),
 
     //Chat error
-    USER_IS_NOT_IN_CHAT_ROOM(7000,"User is not chat room"),
-
+    USER_IS_NOT_IN_CHAT_ROOM(7000,"you are not in chat room"),
+    CHAT_ROOM_IS_ALREADY_EXISTED(7001, "Chat room is already exist"),
+    CHAT_ROOM_IS_NOT_EXISTED(7002, "Chat room is not existed"),
+    RABBITMQ_SERVER_ERROR(7003, null),
     //Chat error
     VALIDATION_ERROR(8000, "Validation error"),
 

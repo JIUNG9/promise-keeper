@@ -21,9 +21,6 @@ public class RoomMember extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private RoomType roomType;
-
     @ManyToOne
     @JoinColumn
     private Member member;

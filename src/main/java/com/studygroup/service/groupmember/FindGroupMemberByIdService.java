@@ -5,7 +5,7 @@ import com.studygroup.entity.StudyGroupMember;
 import com.studygroup.exception.GroupMemberAuthorizationException;
 import com.studygroup.repository.GroupMemberRepository;
 import com.studygroup.util.constant.ErrorCode;
-import com.studygroup.util.constant.ObjectToLong;
+import com.studygroup.util.ObjectToLong;
 import com.studygroup.util.lambda.BindParameterSupplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

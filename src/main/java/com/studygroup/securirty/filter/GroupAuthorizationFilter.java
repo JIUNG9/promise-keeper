@@ -9,7 +9,7 @@ import com.studygroup.service.groupmember.FindGroupMemberService;
 import com.studygroup.util.GetPathVariableInFilter;
 import com.studygroup.util.constant.ConvertObjectToJson;
 import com.studygroup.util.constant.ErrorCode;
-import com.studygroup.util.constant.ObjectToLong;
+import com.studygroup.util.ObjectToLong;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;

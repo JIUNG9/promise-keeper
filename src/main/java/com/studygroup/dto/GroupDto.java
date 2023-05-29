@@ -12,4 +12,5 @@ public class GroupDto {
     private String subject;
     private String name;
     private String intro;
+    private int theNumberOfMember;
 }
