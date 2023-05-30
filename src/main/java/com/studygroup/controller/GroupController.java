@@ -1,17 +1,20 @@
 package com.studygroup.controller;
 
 import com.studygroup.dto.CreateGroupForm;
-import com.studygroup.dto.GroupDto;
+import com.studygroup.util.GroupInfoDto;
+import com.studygroup.dto.GroupMembersDto;
 import com.studygroup.dto.UpdateGroupInfoForm;
+import com.studygroup.entity.Member;
 import com.studygroup.entity.StudyGroup;
 import com.studygroup.enums.MainCategory;
 import com.studygroup.exception.ApiError;
 import com.studygroup.service.CheckDuplicationService;
 import com.studygroup.service.group.*;
 import com.studygroup.service.groupmember.ApplyTheGroupService;
+import com.studygroup.service.groupmember.RetrieveGroupMembersManagedByGroupAdminService;
 import com.studygroup.service.groupmember.RetrieveTheNumberOfGroupMemberService;
 import com.studygroup.service.user.RetrieveMemberByAuthPrinciple;
-import com.studygroup.util.GroupToDto;
+import com.studygroup.util.GroupEntityToGroupInfoDto;
 import com.studygroup.util.constant.ErrorCode;
 import com.studygroup.util.constant.GroupAdminIntro;
 import com.studygroup.util.ObjectToLong;
@@ -43,6 +46,8 @@ public class GroupController {
     private final CreateGroupService createGroupService;
     private final CheckDuplicationService checkGroupNameDuplicationService;
     private final ApplyTheGroupService initialGroupMemberAsAdminService;
+    private final RetrieveGroupsByMangedByGroupAdmin retrieveGroupsByMangedByGroupAdmin;
+    private final RetrieveGroupMembersManagedByGroupAdminService retrieveGroupMembersManagedByGroupAdminService;
     private static final Logger logger = LoggerFactory
             .getLogger(GroupController.class);
 
@@ -56,7 +61,8 @@ public class GroupController {
                            GroupUpdateNameService updateGroupNameService,
                            CreateGroupService createGroupService,
                            @Qualifier("CheckGroupNameDuplicationService") CheckDuplicationService checkGroupNameDuplicationService,
-                           @Qualifier("InitialGroupMemberAsAdminService") ApplyTheGroupService initialGroupMemberAsAdminService) {
+                           @Qualifier("InitialGroupMemberAsAdminService") ApplyTheGroupService initialGroupMemberAsAdminService,
+                           RetrieveGroupsByMangedByGroupAdmin retrieveGroupsByMangedByGroupAdmin, RetrieveGroupMembersManagedByGroupAdminService retrieveGroupMembersManagedByGroupAdminService) {
         this.updateGroupIntroService = updateGroupIntroService;
         this.retrieveTheNumberOfGroupMemberService = retrieveTheNumberOfGroupMemberService;
         this.retrieveAllGroupsService = retrieveAllGroupsService;
@@ -69,6 +75,8 @@ public class GroupController {
         this.createGroupService = createGroupService;
         this.checkGroupNameDuplicationService = checkGroupNameDuplicationService;
         this.initialGroupMemberAsAdminService = initialGroupMemberAsAdminService;
+        this.retrieveGroupsByMangedByGroupAdmin = retrieveGroupsByMangedByGroupAdmin ;
+        this.retrieveGroupMembersManagedByGroupAdminService = retrieveGroupMembersManagedByGroupAdminService;
     }
 
 
@@ -100,6 +108,67 @@ public class GroupController {
 
 
     }
+
+    @GetMapping("/api/groups/admins")
+    public ResponseEntity<Object> getGroupsManagedByGroupAdmin()
+    {
+        Object memberId =
+                SecurityContextHolder.
+                        getContext().
+                        getAuthentication().
+                        getPrincipal();
+
+        Member adminMember =
+                retrieveMemberByAuthPrinciple.
+                        getMember(ObjectToLong.convert(memberId));
+
+        List<GroupInfoDto> groupListManagedByRequestMember =
+                retrieveGroupsByMangedByGroupAdmin.
+                        get(adminMember);
+
+        if(groupListManagedByRequestMember.size()==0){
+            return ResponseEntity.
+                    status(HttpStatus.NO_CONTENT).
+                    build();
+        }
+        return ResponseEntity.
+                status(HttpStatus.OK).
+                body(groupListManagedByRequestMember);
+
+    }
+
+    @GetMapping("/api/groups/{groupName}/admins/members")
+    public ResponseEntity<Object> getGroupMembersManagedByGroupAdmin(@PathVariable String groupName) {
+
+        Object memberId =
+                SecurityContextHolder.
+                        getContext().
+                        getAuthentication().
+                        getPrincipal();
+
+        Member adminMember =
+                retrieveMemberByAuthPrinciple.
+                        getMember(ObjectToLong.convert(memberId));
+
+        StudyGroup studyGroup =
+                findGroupService.
+                        getGroup(groupName);
+
+        List<GroupMembersDto> groupMembersDtoList =
+                retrieveGroupMembersManagedByGroupAdminService.get(studyGroup,adminMember);
+
+                if(groupMembersDtoList.size() <= 1){
+                    return ResponseEntity.
+                            status(HttpStatus.NO_CONTENT).
+                            build();
+                }
+
+        return ResponseEntity.
+                status(HttpStatus.OK).
+                body(groupMembersDtoList);
+    }
+
+
 
 
     @PutMapping("/api/groups/{groupName}/admins/name/{newName}")
@@ -145,26 +214,26 @@ public class GroupController {
                                             @RequestParam(required = false) MainCategory mainCategory,
                                             @RequestParam(required = false) String subject) {
 
-        List<GroupDto> groupDtoList = new ArrayList<>();
+        List<GroupInfoDto> groupInfoDtoList = new ArrayList<>();
         if (name == null && mainCategory == null && subject == null) {
             //전체 검색
-            groupDtoList = GroupToDto.convert(retrieveAllGroupsService.getAll());
+            groupInfoDtoList = GroupEntityToGroupInfoDto.convert(retrieveAllGroupsService.getAll());
         } else if (name != null) {
             //이름 검색
-            groupDtoList.add(GroupToDto.convert(findGroupService.getGroup(name)));
+            groupInfoDtoList.add(GroupEntityToGroupInfoDto.convert(findGroupService.getGroup(name)));
         } else if(mainCategory != null && subject == null){
             //카테고리 별 검색
-            groupDtoList = GroupToDto.convert(retrieveGroupsByCategoryService.get(mainCategory));
+            groupInfoDtoList = GroupEntityToGroupInfoDto.convert(retrieveGroupsByCategoryService.get(mainCategory));
         }
         else{
             //주제 검색
-            groupDtoList = GroupToDto.convert(retrieveGroupsBySubjectService.get(subject));
+            groupInfoDtoList = GroupEntityToGroupInfoDto.convert(retrieveGroupsBySubjectService.get(subject));
         }
 
-        if(groupDtoList.isEmpty()){
+        if(groupInfoDtoList.isEmpty()){
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
-        return ResponseEntity.status(HttpStatus.OK).body(groupDtoList);
+        return ResponseEntity.status(HttpStatus.OK).body(groupInfoDtoList);
     }
 
     @DeleteMapping("/api/groups/{groupName}/admins")

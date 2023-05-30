@@ -34,7 +34,10 @@ public class GroupAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return !path.contains("/groups") || path.matches("/api/groups") || path.contains("api/users/groups");
+        return !path.contains("/groups") ||
+                path.matches("/api/groups") ||
+                path.matches("/api/groups/admins") ||
+                path.contains("api/users/groups");
     }
 
     @Override

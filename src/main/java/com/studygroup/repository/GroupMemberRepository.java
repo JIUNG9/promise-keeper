@@ -15,11 +15,13 @@ public interface GroupMemberRepository extends JpaRepository<StudyGroupMember, L
 
     int countByStudyGroup(StudyGroup studyGroup);
 
-    StudyGroupMember findByStudyGroupAndGroupRole(StudyGroup studyGroup, GroupRole groupRole);
+    List<StudyGroupMember> findByMemberAndGroupRole(Member member, GroupRole groupRole);
     List<StudyGroupMember> findByMember(Member member);
     StudyGroupMember findByStudyGroup_NameAndGroupRole(String groupName,GroupRole groupRole);
     List<StudyGroupMember> findByStudyGroup(StudyGroup studyGroup);
     StudyGroupMember findByStudyGroupAndNickName(StudyGroup studyGroup, String nickName);
     StudyGroupMember findByStudyGroupAndMember_Id(StudyGroup studyGroup,Long memberId);
+    List<StudyGroupMember> findByStudyGroupAndMember(StudyGroup studyGroup, Member member );
+
 }
 

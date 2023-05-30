@@ -1,4 +1,4 @@
-package com.studygroup.dto;
+package com.studygroup.util;
 
 import com.studygroup.enums.MainCategory;
 import lombok.*;
@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupDto {
+public class GroupInfoDto {
     private MainCategory mainCategory;
     private String subject;
     private String name;
