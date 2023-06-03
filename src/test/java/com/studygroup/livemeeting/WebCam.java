@@ -1,8 +1,7 @@
 package com.studygroup.livemeeting;
+import lombok.extern.slf4j.Slf4j;
 import nu.pattern.OpenCV;
 import org.junit.jupiter.api.Test;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
@@ -18,13 +17,8 @@ import java.io.File;
 import java.io.IOException;
 
 @SpringBootTest
+@Slf4j
 public class WebCam {
-
-    //check the socket connection
-    //check there is jpg data from the openCV
-    //check jpg data is changed into binary data well
-    //check send binary data through web socket
-
 
     @Test
     public void getJPGFrameFromWebCam() throws IOException {
@@ -37,9 +31,10 @@ public class WebCam {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(image, "jpg", outputStream);
             byte[] bytes = outputStream.toByteArray();
-            ByteArrayInputStream inStreambj = new ByteArrayInputStream(bytes);
-            BufferedImage newImage = ImageIO.read(inStreambj);
-            ImageIO.write(newImage, "jpg", new File("/Users/ung/Downloads/test.jpg"));
+            ByteArrayInputStream inStream = new ByteArrayInputStream(bytes);
+            log.info(String.valueOf(inStream.readNBytes(1)));
+//            BufferedImage newImage = ImageIO.read(inStream);
+//            ImageIO.write(newImage, "jpg", new File("/Users/ung/Downloads/test.jpg"));
         }
     }
 

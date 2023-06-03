@@ -1,5 +1,6 @@
 package com.studygroup.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +33,7 @@ public class GroupMeeting {
     private LocalTime meetingEndTime;
 
     @Builder.Default
+    @JsonIgnore
     @OneToMany(mappedBy = "groupMeeting", cascade = CascadeType.REMOVE)
     private List<MeetingDay> dayOfWeekList = new java.util.ArrayList<>();
 

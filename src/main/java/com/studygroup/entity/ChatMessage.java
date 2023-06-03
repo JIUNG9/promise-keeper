@@ -1,5 +1,8 @@
 package com.studygroup.entity;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.studygroup.dto.MessageDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +22,7 @@ public class ChatMessage extends BaseTimeEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     @Column(length = 255, nullable = false)
     private String sender;
 
@@ -30,5 +34,14 @@ public class ChatMessage extends BaseTimeEntity{
     @JoinColumn
     private ChatRoom chatRoom;
 
+
+    public static ChatMessage getMessage(MessageDto messageDto,ChatRoom chatRoom){
+        return ChatMessage.
+                builder().
+                payload(messageDto.getPayload()).
+                sender(messageDto.getSender()).
+                chatRoom(chatRoom).
+                build();
+    }
 
 }

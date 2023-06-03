@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service("FindGroupAdminMemberServiceImpl")
 @RequiredArgsConstructor
 public class FindGroupAdminMemberServiceImpl implements FindGroupAdminMemberService {
-    private GroupMemberRepository groupMemberRepository;
+    private final GroupMemberRepository groupMemberRepository;
     @Override
     public StudyGroupMember findAdminMember(String groupName) {
 

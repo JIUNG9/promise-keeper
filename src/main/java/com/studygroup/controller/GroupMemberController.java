@@ -72,7 +72,7 @@ public class GroupMemberController {
         this.findGroupService = findGroupService;
     }
 
-    @PostMapping("/api/users/groups/{groupName}")
+    @PostMapping("/api/users/groups/{groupName}/applications")
     public ResponseEntity<Object> userApplyTheGroup(@PathVariable String groupName,
                                                     @Valid @RequestBody GroupApplicationForm groupApplicationForm) {
 

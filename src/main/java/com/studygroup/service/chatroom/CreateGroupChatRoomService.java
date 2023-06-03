@@ -13,7 +13,7 @@ public class CreateGroupChatRoomService implements CreateChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     @Override
     public ChatRoom create(String groupName) {
-
+        
         ChatRoom chatRoom = ChatRoom.
                                 builder().
                                 name(ChatRoomNameGenerator.getGroupChatRoomName(groupName)).

@@ -5,14 +5,20 @@ import com.studygroup.dto.MyChatRoomDto;
 import com.studygroup.entity.ChatRoom;
 import com.studygroup.entity.Member;
 import com.studygroup.exception.ApiError;
+import com.studygroup.service.SendMessageService;
+import com.studygroup.service.chat.ExitMessageService;
+import com.studygroup.service.chat.GreetingMessageService;
 import com.studygroup.service.chatroom.FindGroupChatRoomService;
 import com.studygroup.service.chatroom.*;
+
 import com.studygroup.service.groupmember.FindGroupAdminMemberService;
-import com.studygroup.service.groupmember.LeaveGroupChatRoomService;
 import com.studygroup.service.user.RetrieveMemberByAuthPrinciple;
+import com.studygroup.util.ChatRoomNameGenerator;
 import com.studygroup.util.WebcamUtils;
 import com.studygroup.util.constant.ErrorCode;
 import com.studygroup.util.ObjectToLong;
+import com.studygroup.util.constant.RoutingKeyGenerator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +27,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-
+@Slf4j
 @RestController
 public class ChatRoomController {
 
     private  FindGroupChatRoomService findLiveGroupChatRoom;
     private  FindGroupChatRoomService findGroupChatRoom;
-    private  GetInquiryChatHistoryService getInquiryChatHistoryService;
-    private  GetGroupChatHistoryService getGroupChatHistoryService;
+    private GetChatHistoryService getChatHistoryService;
     private  RetrieveMyChatRoomListService retrieveMyChatRoomList;
     private  FindGroupAdminMemberService findGroupAdminMember;
     private  FindInquiryChatRoomService findInquiryChatRoomService;
@@ -37,17 +42,21 @@ public class ChatRoomController {
     private  CreateChatRoomService createLiveGroupChatRoom;
     private  AddChatRoomMember addChatRoomMember;
     private  RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple;
-    private  LeaveGroupChatRoomService leaveGroupChatRoomService;
-    private  LeaveGroupChatRoomService leaveLiveGroupChatRoomService;
-    private  LeaveInquiryChatRoomService leaveInquiryChatRoomService;
+    private LeaveChatRoomService leaveChatRoomService;
     private  DeleteChatRoomService deleteInquiryChatRoomService;
     private  DeleteChatRoomService deleteLiveChatRoomService;
-    private  CountChatRoomMember countChatRoomMember;
+    private CountChatRoomMemberService countChatRoomMemberService;
+    private FindMemberIsInChatRoom findMemberIsInChatRoom;
+    private IsOneToOneChatRoomExistService isOneToOneChatRoomExistService;
+    private GetGroupNickNameService getGroupNickNameService;
+    private SendMessageService sendMessageService;
+    private GreetingMessageService greetingMessageService;
+    private ExitMessageService exitMessageService;
+
 
     public ChatRoomController(@Qualifier("FindLiveGroupChatRoomService") FindGroupChatRoomService findLiveGroupChatRoom,
                               @Qualifier("FindGroupChatRoomServiceImpl") FindGroupChatRoomService findGroupChatRoom,
-                              GetInquiryChatHistoryService getInquiryChatHistoryService,
-                              GetGroupChatHistoryService getGroupChatHistoryService,
+                              GetChatHistoryService getChatHistoryService,
                               @Qualifier("RetrieveMyChatRoomListServiceImpl") RetrieveMyChatRoomListService retrieveMyChatRoomList,
                               @Qualifier("FindGroupAdminMemberServiceImpl") FindGroupAdminMemberService findGroupAdminMember,
                               FindInquiryChatRoomService findInquiryChatRoomService,
@@ -56,16 +65,23 @@ public class ChatRoomController {
                               @Qualifier("CreateLiveChatRoomService") CreateChatRoomService createLiveGroupChatRoom,
                               AddChatRoomMember addChatRoomMember,
                               RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple,
-                              @Qualifier("GoOutGroupChatRoomService") LeaveGroupChatRoomService leaveGroupChatRoomService,
-                              @Qualifier("GoOutLiveGroupChatRoomService") LeaveGroupChatRoomService leaveLiveGroupChatRoomService,
-                              LeaveInquiryChatRoomService leaveInquiryChatRoomService,
                               @Qualifier("DeleteInquiryChatRoomService") DeleteChatRoomService deleteInquiryChatRoomService,
                               @Qualifier("DeleteLiveGroupMeetingRoomService") DeleteChatRoomService deleteLiveChatRoomService,
-                              CountChatRoomMember countChatRoomMember) {
+                              CountChatRoomMemberService countChatRoomMemberService,
+                              FindMemberIsInChatRoom findMemberIsInChatRoom,
+                              LeaveChatRoomService leaveChatRoomService,
+                              IsOneToOneChatRoomExistService isOneToOneChatRoomExistService,
+                              GetGroupNickNameService getGroupNickNameService,
+                              SendMessageService sendMessageService,
+                              GreetingMessageService greetingMessageService,
+                              ExitMessageService exitMessageService
+
+                              ) {
+        this.findMemberIsInChatRoom = findMemberIsInChatRoom;
+        this.leaveChatRoomService = leaveChatRoomService;
         this.findLiveGroupChatRoom = findLiveGroupChatRoom;
         this.findGroupChatRoom = findGroupChatRoom;
-        this.getInquiryChatHistoryService = getInquiryChatHistoryService;
-        this.getGroupChatHistoryService = getGroupChatHistoryService;
+        this.getChatHistoryService = getChatHistoryService;
         this.retrieveMyChatRoomList = retrieveMyChatRoomList;
         this.findGroupAdminMember = findGroupAdminMember;
         this.findInquiryChatRoomService = findInquiryChatRoomService;
@@ -74,12 +90,14 @@ public class ChatRoomController {
         this.createLiveGroupChatRoom = createLiveGroupChatRoom;
         this.addChatRoomMember = addChatRoomMember;
         this.retrieveMemberByAuthPrinciple = retrieveMemberByAuthPrinciple;
-        this.leaveGroupChatRoomService = leaveGroupChatRoomService;
-        this.leaveLiveGroupChatRoomService = leaveLiveGroupChatRoomService;
-        this.leaveInquiryChatRoomService = leaveInquiryChatRoomService;
         this.deleteInquiryChatRoomService = deleteInquiryChatRoomService;
         this.deleteLiveChatRoomService = deleteLiveChatRoomService;
-        this.countChatRoomMember = countChatRoomMember;
+        this.countChatRoomMemberService = countChatRoomMemberService;
+        this.isOneToOneChatRoomExistService = isOneToOneChatRoomExistService;
+        this.getGroupNickNameService = getGroupNickNameService;
+        this.sendMessageService = sendMessageService;
+        this.exitMessageService = exitMessageService;
+        this.greetingMessageService = greetingMessageService;
     }
 
     @GetMapping("/api/users/chats")
@@ -96,6 +114,12 @@ public class ChatRoomController {
                         getMember(ObjectToLong.convert(memberId));
         List<MyChatRoomDto> myChatRoomDtoList = retrieveMyChatRoomList.get(member);
 
+        if(myChatRoomDtoList.size()<=0){
+            return ResponseEntity.
+                    status(HttpStatus.NO_CONTENT).
+                    build();
+        }
+
         return ResponseEntity.
                 status(HttpStatus.OK).
                 body(myChatRoomDtoList);
@@ -103,10 +127,9 @@ public class ChatRoomController {
     }
 
 
-        @PostMapping("/api/users/chats/groups/{groupName}/inquiry-room")
+
+        @PostMapping("/api/users/chats/{groupName}/inquiry-room")
     public ResponseEntity<Object> CreateInquireRoom(@PathVariable String groupName){
-
-
         Object memberId =
                 SecurityContextHolder.
                         getContext().
@@ -122,29 +145,41 @@ public class ChatRoomController {
                         findAdminMember(groupName).
                         getMember();
 
+            String roomName =
+                    ChatRoomNameGenerator.
+                            getInquiryRoomName(requestMember.getName(),
+                                    groupName);
 
-        Optional<ChatRoom> chatRoom =
+            Optional<ChatRoom> chatRoom =
                 findInquiryChatRoomService.
-                        find(groupName, requestMember.getName());
+                        find(roomName, requestMember);
 
-        if(chatRoom.isEmpty()){
+        if(chatRoom.isPresent()){
+            return ApiError.
+                    buildApiError(ErrorCode.CHAT_ROOM_IS_ALREADY_EXISTED,
+                            HttpStatus.BAD_REQUEST);
+        }
 
             ChatRoom createdChatRoom =
                     createInquiryChatRoom.
-                            create(requestMember.getName(),groupName);
-            addChatRoomMember.addMember(createdChatRoom,requestMember);
+                            create(requestMember.getName(), groupName);
+            addChatRoomMember.addMember(createdChatRoom, requestMember);
             addChatRoomMember.addMember(createdChatRoom, groupAdminMember);
+            sendMessageService.sendMessage(
+                    RoutingKeyGenerator.
+                            inquiryRoutingKey(createdChatRoom.getName()),
+                                    greetingMessageService.get(requestMember.getName(), createdChatRoom));
+            sendMessageService.sendMessage(
+                    RoutingKeyGenerator.
+                            inquiryRoutingKey(createdChatRoom.getName()),
+                    greetingMessageService.get(groupName+" 관리자", createdChatRoom));
 
             return ResponseEntity.
                     status(HttpStatus.OK).
-                    body("Chat room is successfully made!");
+                    body("Chat room is successfully created!");
+
         }
 
-        return ApiError.
-                buildApiError(ErrorCode.CHAT_ROOM_IS_ALREADY_EXISTED,
-                HttpStatus.BAD_REQUEST);
-
-    }
 
     @GetMapping("/api/users/chats/inquiry/{groupName}")
     public ResponseEntity<Object> enterInquiryRoom(@PathVariable String groupName) {
@@ -159,18 +194,46 @@ public class ChatRoomController {
                 retrieveMemberByAuthPrinciple.
                         getMember(ObjectToLong.convert(memberId));
 
-        List<MessageLog> messageLogList =
-                getInquiryChatHistoryService.
-                        get(member.getName(),groupName);
+        String roomName = ChatRoomNameGenerator.getInquiryRoomName(member.getName(),groupName);
 
-        return ResponseEntity.
-                status(HttpStatus.OK).
-                body(messageLogList);
+        if (isOneToOneChatRoomExistService.isExist(roomName)) {
 
+            Optional<ChatRoom> chatRoom =
+                    findInquiryChatRoomService.
+                            find(roomName, member);
+
+            if (chatRoom.isPresent()) {
+                    List<MessageLog> messageLogList =
+                            getChatHistoryService.
+                                    get(member, chatRoom.get());
+
+                    if (messageLogList.size() <= 0) {
+                        return ResponseEntity.
+                                status(HttpStatus.NO_CONTENT).
+                                body(messageLogList);
+                    }
+                    return ResponseEntity.
+                            status(HttpStatus.OK).
+                            body(messageLogList);
+
+
+            }
+            return ApiError.
+                    buildApiError(
+                            ErrorCode.USER_IS_NOT_IN_CHAT_ROOM,
+                            HttpStatus.BAD_REQUEST);
+
+        }
+        return ApiError.
+                buildApiError(
+                        ErrorCode.CHAT_ROOM_IS_NOT_EXISTED,
+                        HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/api/users/chats/groups/admins/{groupName}/group-chat")
+    @PostMapping("/api/users/chats/groups/{groupName}/admins/group-chat")
     public ResponseEntity<Object> CreateGroupChatRoom(@PathVariable String groupName) {
+
+
 
             if(findGroupChatRoom.find(groupName).isEmpty()){
 
@@ -187,6 +250,12 @@ public class ChatRoomController {
 
                 ChatRoom groupChatRoom = createGroupChatRoom.create(groupName);
                 addChatRoomMember.addMember(groupChatRoom, groupAdmin);
+                String roomName = ChatRoomNameGenerator.getGroupChatRoomName(groupName);
+                String routingKey = RoutingKeyGenerator.groupChatRoomRoutingKey(roomName);
+                String memberNickName = getGroupNickNameService.getNickName(groupAdmin, groupName);
+                sendMessageService.sendMessage(
+                        routingKey,
+                        greetingMessageService.get(memberNickName, groupChatRoom));
 
                 return ResponseEntity.
                         status(HttpStatus.OK).
@@ -201,11 +270,49 @@ public class ChatRoomController {
 
     @GetMapping("/api/users/chats/groups/{groupName}/group-chat")
     public ResponseEntity<Object> enterGroupChat(@PathVariable String groupName) {
-        List<MessageLog> messageLogList = getGroupChatHistoryService.get(groupName);
 
-        return ResponseEntity.
-                status(HttpStatus.OK).
-                body(messageLogList);
+        Optional<ChatRoom> chatRoom = findGroupChatRoom.find(groupName);
+        if(chatRoom.isPresent()){
+
+            Object memberId =
+                    SecurityContextHolder.
+                            getContext().
+                            getAuthentication().
+                            getPrincipal();
+
+            Member groupMember =
+                    retrieveMemberByAuthPrinciple.
+                            getMember(ObjectToLong.convert(memberId));
+
+            if(findMemberIsInChatRoom.find(groupMember,chatRoom.get().getName()).isEmpty()){
+                String roomName = ChatRoomNameGenerator.getGroupChatRoomName(groupName);
+                String routingKey = RoutingKeyGenerator.groupChatRoomRoutingKey(roomName);
+                String memberNickName = getGroupNickNameService.getNickName(groupMember, groupName);
+                addChatRoomMember.addMember(chatRoom.get(), groupMember);
+                sendMessageService.sendMessage(
+                        routingKey,
+                        greetingMessageService.get(memberNickName,chatRoom.get()));
+                    }
+
+            List<MessageLog> messageLogList =
+                    getChatHistoryService.
+                            get(groupMember, chatRoom.get());
+
+            if(messageLogList.size() <= 0 ){
+                return ResponseEntity.
+                        status(HttpStatus.NO_CONTENT).
+                        build();
+            }
+
+            return ResponseEntity.
+                    status(HttpStatus.OK).
+                    body(messageLogList);
+
+        }
+        return ApiError.buildApiError(
+                ErrorCode.CHAT_ROOM_IS_NOT_EXISTED,
+                HttpStatus.BAD_REQUEST);
+
     }
 
     @PostMapping("/api/users/chats/groups/{groupName}/admins/live-chats")
@@ -222,8 +329,14 @@ public class ChatRoomController {
                     retrieveMemberByAuthPrinciple.
                             getMember(ObjectToLong.convert(memberId));
 
-            ChatRoom groupChatRoom = createLiveGroupChatRoom.create(groupName);
-            addChatRoomMember.addMember(groupChatRoom, groupAdmin);
+            ChatRoom groupLiveChatRoom = createLiveGroupChatRoom.create(groupName);
+            addChatRoomMember.addMember(groupLiveChatRoom, groupAdmin);
+            String roomName = ChatRoomNameGenerator.getLiveChatRoomName(groupName);
+            String routingKey = RoutingKeyGenerator.liveGroupChatRoutingKey(roomName);
+            String memberNickName = getGroupNickNameService.getNickName(groupAdmin, groupName);
+            sendMessageService.sendMessage(
+                    routingKey,
+                    greetingMessageService.get(memberNickName, groupLiveChatRoom));
 
             return ResponseEntity.
                     status(HttpStatus.OK).
@@ -239,18 +352,52 @@ public class ChatRoomController {
 
     @GetMapping("/api/users/chats/groups/{groupName}/live-chats")
     public ResponseEntity<Object> enterLiveMeetingChat(@PathVariable String groupName) {
-        if(findLiveGroupChatRoom.find(groupName).isEmpty()){
+
+        Optional<ChatRoom> chatRoom = findLiveGroupChatRoom.find(groupName);
+
+        if(chatRoom.isPresent()){
+
+            Object memberId =
+                    SecurityContextHolder.
+                            getContext().
+                            getAuthentication().
+                            getPrincipal();
+
+            Member groupMember =
+                    retrieveMemberByAuthPrinciple.
+                            getMember(ObjectToLong.convert(memberId));
+
+            if(findMemberIsInChatRoom.find(groupMember,chatRoom.get().getName()).isEmpty()) {
+                String roomName = ChatRoomNameGenerator.getLiveChatRoomName(groupName);
+                String routingKey = RoutingKeyGenerator.liveGroupChatRoutingKey(roomName);
+                String memberNickName = getGroupNickNameService.getNickName(groupMember, groupName);
+                addChatRoomMember.addMember(chatRoom.get(), groupMember);
+                sendMessageService.sendMessage(
+                        routingKey,
+                        greetingMessageService.get(memberNickName, chatRoom.get()));
+            }
+
+            List<MessageLog> messageLogList =
+                    getChatHistoryService.
+                            get(groupMember, chatRoom.get());
+
+            if(messageLogList.size() <=0 ){
+                return  ResponseEntity.
+                        status(HttpStatus.NO_CONTENT).
+                        body(messageLogList);
+            }
+            return ResponseEntity.
+                    status(HttpStatus.OK).
+                    body(messageLogList);
+        }
             return ApiError.
                     buildApiError(ErrorCode.CHAT_ROOM_IS_NOT_EXISTED,
                             HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.
-                status(HttpStatus.OK).
-                body("enter the chatRoom!");
 
-    }
 
-    @DeleteMapping("/api/users/chats/{groupName}/group-chats")
+
+    @DeleteMapping("/api/users/chats/groups/{groupName}/group-chats")
     public ResponseEntity<Object> exitGroupChatRoom(@PathVariable String groupName) {
 
         Optional<ChatRoom> chatRoom =findGroupChatRoom.find(groupName);
@@ -262,11 +409,17 @@ public class ChatRoomController {
                             getAuthentication().
                             getPrincipal();
 
-            Member groupUser =
+            Member groupMember =
                     retrieveMemberByAuthPrinciple.
                             getMember(ObjectToLong.convert(memberId));
 
-                leaveGroupChatRoomService.goOut(groupName, groupUser);
+            leaveChatRoomService.goOut(groupMember, chatRoom.get());
+            String roomName = ChatRoomNameGenerator.getGroupChatRoomName(groupName);
+            String routingKey = RoutingKeyGenerator.groupChatRoomRoutingKey(roomName);
+            String memberNickName = getGroupNickNameService.getNickName(groupMember, groupName);
+            sendMessageService.sendMessage(
+                    routingKey,
+                    exitMessageService.get(memberNickName, chatRoom.get()));
 
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
@@ -279,9 +432,7 @@ public class ChatRoomController {
         }
 
 
-
-
-    @DeleteMapping("/api/users/chats/{groupName}/live-chats")
+    @DeleteMapping("/api/users/chats/groups/{groupName}/live-chats")
     public ResponseEntity<Object> exitGroupLiveChatRoom(@PathVariable String groupName) {
 
         Optional<ChatRoom> chatRoom = findLiveGroupChatRoom.find(groupName);
@@ -293,15 +444,25 @@ public class ChatRoomController {
                             getAuthentication().
                             getPrincipal();
 
-            Member groupUser =
+            Member groupMember =
                     retrieveMemberByAuthPrinciple.
                             getMember(ObjectToLong.convert(memberId));
 
-            leaveLiveGroupChatRoomService.goOut(groupName, groupUser );
+            leaveChatRoomService.goOut(groupMember,chatRoom.get());
+            String roomName = ChatRoomNameGenerator.getLiveChatRoomName(groupName);
+            String routingKey = RoutingKeyGenerator.liveGroupChatRoutingKey(roomName);
+            String memberNickName = getGroupNickNameService.getNickName(groupMember, groupName);
+            sendMessageService.sendMessage(
+                    routingKey,
+                    exitMessageService.get(memberNickName, chatRoom.get()));
             WebcamUtils.stopSendingVideo();
 
-            if(countChatRoomMember.get(chatRoom.get()) <= 0){
+            if(countChatRoomMemberService.get(chatRoom.get()) <= 0){
                 deleteLiveChatRoomService.delete(chatRoom.get());
+                return ResponseEntity.
+                        status(HttpStatus.OK).
+                        body("Live chat session will be terminated");
+
             }
 
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -314,8 +475,8 @@ public class ChatRoomController {
 
     }
 
-    @DeleteMapping("/api/users/chats/{groupName}")
-    public ResponseEntity<Object> exitInquiryRoom(@PathVariable String groupName) {
+    @DeleteMapping("/api/users/chats/{roomName}")
+    public ResponseEntity<Object> exitInquiryRoom(@PathVariable String roomName) {
 
         Object memberId =
                 SecurityContextHolder.
@@ -327,17 +488,30 @@ public class ChatRoomController {
                 retrieveMemberByAuthPrinciple.
                         getMember(ObjectToLong.convert(memberId));
 
-        Optional<ChatRoom> chatRoom =
+        Optional<ChatRoom> userInChatRoom =
                 findInquiryChatRoomService.
-                        find(groupName,requestMember.getName());
+                        find(roomName,requestMember);
 
-        if(chatRoom.isPresent()){
-            leaveInquiryChatRoomService.goOut(requestMember.getName(), groupName);
-            if(countChatRoomMember.get(chatRoom.get()) <= 0 ){
-                deleteInquiryChatRoomService.delete(chatRoom.get());
+        if(isOneToOneChatRoomExistService.isExist(roomName)){
+            if (userInChatRoom.isPresent()) {
+                leaveChatRoomService.goOut(requestMember, userInChatRoom.get());
+
+                String routingKey =
+                        RoutingKeyGenerator.
+                                inquiryRoutingKey(roomName);
+                sendMessageService.sendMessage(
+                        routingKey,
+                        exitMessageService.get(requestMember.getName(), userInChatRoom.get()));
+
+                if (countChatRoomMemberService.get(userInChatRoom.get()) <= 0) {
+                    deleteInquiryChatRoomService.delete(userInChatRoom.get());
+                }
+
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-
+            return ApiError.buildApiError(
+                    ErrorCode.USER_IS_NOT_IN_CHAT_ROOM,
+                    HttpStatus.BAD_REQUEST);
         }
 
         return ApiError.buildApiError(

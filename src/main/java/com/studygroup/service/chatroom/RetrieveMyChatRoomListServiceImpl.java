@@ -24,7 +24,6 @@ public class RetrieveMyChatRoomListServiceImpl implements RetrieveMyChatRoomList
                     map(roomMember->
                         MyChatRoomDto.
                                 builder().
-                                roomId(roomMember.getId()).
                                 roomType(roomMember.getRoom().getRoomType()).
                                 roomName(roomMember.getRoom().getName()).
                                 build()).

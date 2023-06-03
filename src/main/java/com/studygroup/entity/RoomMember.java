@@ -21,9 +21,11 @@ public class RoomMember extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)    @JoinColumn
+    @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)    @JoinColumn
+    @JoinColumn
+    @ManyToOne(fetch = FetchType.EAGER)
     private ChatRoom room;
 }

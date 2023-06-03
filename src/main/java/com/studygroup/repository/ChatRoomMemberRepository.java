@@ -12,9 +12,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ChatRoomMemberRepository extends JpaRepository<RoomMember, Integer> {
+public interface ChatRoomMemberRepository extends JpaRepository<RoomMember, Long> {
     List<RoomMember> findByMember(Member member);
     Optional<RoomMember> findByMemberAndRoom(Member member, ChatRoom chatRoom);
+    Optional<RoomMember> findByMemberAndRoom_Name(Member member, String roomName);
     int countByRoom(ChatRoom chatRoom);
 
 

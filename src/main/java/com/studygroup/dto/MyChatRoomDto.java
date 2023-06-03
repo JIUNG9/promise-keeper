@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @AllArgsConstructor
 @Getter
 public class MyChatRoomDto {
-    private Long roomId;
     private String roomName;
     private RoomType roomType;
 

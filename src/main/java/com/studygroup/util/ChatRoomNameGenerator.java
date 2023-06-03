@@ -2,9 +2,8 @@ package com.studygroup.util;
 
 public class ChatRoomNameGenerator {
 
-    private static StringBuilder sb = new StringBuilder();
-
     public static String getInquiryRoomName(String requestUserName, String groupName ){
+        StringBuilder sb = new StringBuilder();
         sb.append(requestUserName);
         sb.append("님이");
         sb.append(" ");
@@ -18,6 +17,7 @@ public class ChatRoomNameGenerator {
     }
 
     public static String getGroupChatRoomName(String groupName) {
+        StringBuilder sb = new StringBuilder();
         sb.append(groupName);
         sb.append(" ");
         sb.append("단체 채팅방");
@@ -26,6 +26,7 @@ public class ChatRoomNameGenerator {
     }
 
     public static String getLiveChatRoomName(String groupName) {
+        StringBuilder sb = new StringBuilder();
         sb.append(groupName);
         sb.append(" ");
         sb.append("실시간 그룹 채팅방");

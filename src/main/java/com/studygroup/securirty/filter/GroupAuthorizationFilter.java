@@ -37,7 +37,8 @@ public class GroupAuthorizationFilter extends OncePerRequestFilter {
         return !path.contains("/groups") ||
                 path.matches("/api/groups") ||
                 path.matches("/api/groups/admins") ||
-                path.contains("api/users/groups");
+                path.contains("/applications");
+
     }
 
     @Override
@@ -83,6 +84,7 @@ public class GroupAuthorizationFilter extends OncePerRequestFilter {
                                             e.getErrorCode(),
                                             HttpStatus.NOT_FOUND).
                                     getBody()));
+            response.setStatus(404);
         }
         catch (AuthenticationException e) {
             failureHandler.onAuthenticationFailure(request, response, e);

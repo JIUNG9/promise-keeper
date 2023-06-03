@@ -58,6 +58,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         write(ConvertObjectToJson.convert(
                                 ApiError.
                                         buildApiError(errorCode, status).getBody()));
+                response.setStatus(401);
                 return;
             }
         } catch (ExpiredJwtException e) {
@@ -68,6 +69,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     write(ConvertObjectToJson.convert(
                             ApiError.
                                     buildApiError(errorCode, status).getBody()));
+            response.setStatus(401);
             return;
         }
 

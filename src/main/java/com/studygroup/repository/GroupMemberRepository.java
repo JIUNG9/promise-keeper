@@ -21,7 +21,7 @@ public interface GroupMemberRepository extends JpaRepository<StudyGroupMember, L
     List<StudyGroupMember> findByStudyGroup(StudyGroup studyGroup);
     StudyGroupMember findByStudyGroupAndNickName(StudyGroup studyGroup, String nickName);
     StudyGroupMember findByStudyGroupAndMember_Id(StudyGroup studyGroup,Long memberId);
-    List<StudyGroupMember> findByStudyGroupAndMember(StudyGroup studyGroup, Member member );
+    StudyGroupMember findByStudyGroup_NameAndMember(String groupName, Member member );
 
 }
 

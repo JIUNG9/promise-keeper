@@ -4,6 +4,6 @@ import com.studygroup.entity.ChatRoom;
 import org.springframework.stereotype.Service;
 
 @Service
-public interface CountChatRoomMember {
+public interface CountChatRoomMemberService {
     public int get(ChatRoom chatRoom);
 }
