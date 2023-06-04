@@ -2,6 +2,7 @@ package com.studygroup.controller;
 
 import com.studygroup.dto.MemberSignUpForm;
 
+import com.studygroup.dto.MyInfoDto;
 import com.studygroup.dto.PasswordUpdateForm;
 import com.studygroup.entity.Member;
 import com.studygroup.exception.ApiError;
@@ -19,7 +20,7 @@ import com.studygroup.util.JwtUtil;
 import com.studygroup.util.RandomPasswordGenerator;
 import com.studygroup.util.constant.ErrorCode;
 import com.studygroup.util.constant.LoginExpirationTime;
-import com.studygroup.util.constant.ObjectToLong;
+import com.studygroup.util.ObjectToLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +39,13 @@ public class UserController {
     private final UserRemovalService userDeletionService;
     private final RetrieveMemberByToken retrieveMemberByVerificationTokenService;
     private final RetrieveMemberByToken retrieveMemberServiceByPasswordResetTokenService;
-    private final RetrieveMemberByIdService retrieveMemberByIdService;
+    private final RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple;
     private final RetrieveMemberByEmail retrieveMemberByEmailService;
     private final UpdateUserIsEnableService updateUserIsEnableService;
     private final UpdateUserPasswordService updatePasswordService;
     private final VerifyTheTokenService verifyUserValidateToken;
     private final VerifyTheTokenService verifyPasswordResetToken;
+    private final GetMyInformationService getMyInformationService;
     private final SignUpService signUpService;
     private final LogoutService logoutService;
     private static final Logger logger = LoggerFactory
@@ -53,27 +55,28 @@ public class UserController {
             @Qualifier("UserKickService") UserRemovalService withdrawalUserAsAdminService,
             @Qualifier("UserDeletionService") UserRemovalService userDeletionService,
             @Qualifier("CheckEmailDuplicationService") CheckDuplicationService checkEmailDuplicationService,
-            @Qualifier("RetrieveMemberByVerificationTokenService")RetrieveMemberByToken retrieveMemberByVerificationTokenService,
-            @Qualifier("RetrieveMemberServiceByPasswordResetTokenService")RetrieveMemberByToken retrieveMemberServiceByPasswordResetTokenService,
-                          RetrieveMemberByIdService retrieveMemberByIdService,
+            @Qualifier("RetrieveMemberByVerificationTokenService") RetrieveMemberByToken retrieveMemberByVerificationTokenService,
+            @Qualifier("RetrieveMemberServiceByPasswordResetTokenService") RetrieveMemberByToken retrieveMemberServiceByPasswordResetTokenService,
+            RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple,
             @Qualifier("RetrieveMemberByEmailService") RetrieveMemberByEmail retrieveMemberByEmailService,
-                          UpdateUserIsEnableService updateUserIsEnableService,
-            @Qualifier("UpdatePasswordService")UpdateUserPasswordService updatePasswordService,
-            @Qualifier("VerifyUserValidateTokenService")VerifyTheTokenService verifyUserValidateToken,
-            @Qualifier("VerifyPasswordResetTokenService")VerifyTheTokenService verifyPasswordResetToken,
-                          SignUpService signUpService,
-                          LogoutService logoutService) {
+            UpdateUserIsEnableService updateUserIsEnableService,
+            @Qualifier("UpdatePasswordService") UpdateUserPasswordService updatePasswordService,
+            @Qualifier("VerifyUserValidateTokenService") VerifyTheTokenService verifyUserValidateToken,
+            @Qualifier("VerifyPasswordResetTokenService") VerifyTheTokenService verifyPasswordResetToken,
+            GetMyInformationService getMyInformationService, SignUpService signUpService,
+            LogoutService logoutService) {
         this.withdrawalUserAsAdminService = withdrawalUserAsAdminService;
         this.checkEmailDuplicationService = checkEmailDuplicationService;
         this.userDeletionService = userDeletionService;
         this.retrieveMemberByVerificationTokenService = retrieveMemberByVerificationTokenService;
         this.retrieveMemberServiceByPasswordResetTokenService = retrieveMemberServiceByPasswordResetTokenService;
-        this.retrieveMemberByIdService = retrieveMemberByIdService;
+        this.retrieveMemberByAuthPrinciple = retrieveMemberByAuthPrinciple;
         this.retrieveMemberByEmailService = retrieveMemberByEmailService;
         this.updateUserIsEnableService = updateUserIsEnableService;
         this.updatePasswordService = updatePasswordService;
         this.verifyUserValidateToken = verifyUserValidateToken;
         this.verifyPasswordResetToken = verifyPasswordResetToken;
+        this.getMyInformationService = getMyInformationService;
         this.signUpService = signUpService;
         this.logoutService = logoutService;
     }
@@ -201,7 +204,7 @@ public class UserController {
     public ResponseEntity<Object> updatePassword(@AuthenticationPrincipal Object memberId,
                                                  @RequestBody @Valid PasswordUpdateForm passwordUpdateForm) {
 
-            Member member = retrieveMemberByIdService.getMember(ObjectToLong.convert(memberId));
+            Member member = retrieveMemberByAuthPrinciple.getMember(ObjectToLong.convert(memberId));
             updatePasswordService.update(member, passwordUpdateForm.getPassword());
 
         return ResponseEntity.
@@ -209,6 +212,19 @@ public class UserController {
                 body("update password is succeeded ");
 
     }
+
+    @GetMapping("/api/users/info")
+    public ResponseEntity<Object> updatePassword(@AuthenticationPrincipal Object memberId) {
+
+        Member member = retrieveMemberByAuthPrinciple.getMember(ObjectToLong.convert(memberId));
+        MyInfoDto myInfoDto = getMyInformationService.getMyInfo(member);
+        return ResponseEntity.
+                status(HttpStatus.OK).
+                body(myInfoDto);
+
+    }
+
+
 
     @DeleteMapping("/api/users/info/{email}")
     public ResponseEntity<Object> withdrawalUserSelf(@AuthenticationPrincipal Object memberId,
@@ -231,7 +247,7 @@ public class UserController {
     @DeleteMapping("/api/admins/{userId}")
     public ResponseEntity<Object> kickUserAsAdmin(@PathVariable Long userId) {
 
-        Member member = retrieveMemberByIdService.getMember(userId);
+        Member member = retrieveMemberByAuthPrinciple.getMember(userId);
         logger.info(member.toString());
 
         withdrawalUserAsAdminService.removeUser(member);

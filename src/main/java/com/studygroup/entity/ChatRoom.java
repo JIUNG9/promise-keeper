@@ -3,6 +3,9 @@ package com.studygroup.entity;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.studygroup.enums.RoomType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,10 +28,15 @@ public class ChatRoom extends BaseTimeEntity{
     @Column(length = 255, nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    private RoomType roomType;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "room")
     private List<RoomMember> roomMember;
 
-    @OneToMany(mappedBy = "chatRoom")
-    private List<Chat> chatList;
+    @JsonIgnore
+    @OneToMany(mappedBy = "chatRoom" )
+    private List<ChatMessage> chatList = new java.util.ArrayList<>();
 
 }

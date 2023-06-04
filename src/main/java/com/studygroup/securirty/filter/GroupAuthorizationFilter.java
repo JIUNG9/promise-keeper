@@ -4,12 +4,12 @@ import com.studygroup.entity.StudyGroup;
 import com.studygroup.enums.GroupRole;
 import com.studygroup.exception.*;
 import com.studygroup.securirty.handler.GroupAuthenticationFailureHandler;
-import com.studygroup.service.group.RetrieveGroupByNameService;
-import com.studygroup.service.groupmember.RetrieveGroupMemberByMemberIdAndGroup;
+import com.studygroup.service.group.FindGroupService;
+import com.studygroup.service.groupmember.FindGroupMemberService;
 import com.studygroup.util.GetPathVariableInFilter;
 import com.studygroup.util.constant.ConvertObjectToJson;
 import com.studygroup.util.constant.ErrorCode;
-import com.studygroup.util.constant.ObjectToLong;
+import com.studygroup.util.ObjectToLong;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -28,13 +28,17 @@ import java.io.IOException;
 public class GroupAuthorizationFilter extends OncePerRequestFilter {
 
     private final GroupAuthenticationFailureHandler failureHandler;
-    private final RetrieveGroupMemberByMemberIdAndGroup retrieveGroupMemberService;
-    private final RetrieveGroupByNameService retrieveGroupByNameService;
+    private final FindGroupMemberService findGroupMemberService;
+    private final FindGroupService findGroupService ;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return !path.contains("/groups") || path.matches("/api/groups") || path.contains("api/users/groups");
+        return !path.contains("/groups") ||
+                path.matches("/api/groups") ||
+                path.matches("/api/groups/admins") ||
+                path.contains("/applications");
+
     }
 
     @Override
@@ -47,8 +51,8 @@ public class GroupAuthorizationFilter extends OncePerRequestFilter {
 
 
         try {
-            StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
-            GroupRole groupRole = retrieveGroupMemberService.get(studyGroup, memberId).getGroupRole();
+            StudyGroup studyGroup = findGroupService.getGroup(groupName);
+            GroupRole groupRole = findGroupMemberService.getGroupMember(studyGroup, memberId).getGroupRole();
             //check the group admin authority
             if (path.contains("/admins")) {
                 if (!groupRole.equals(GroupRole.GROUP_ADMIN)) {
@@ -80,6 +84,7 @@ public class GroupAuthorizationFilter extends OncePerRequestFilter {
                                             e.getErrorCode(),
                                             HttpStatus.NOT_FOUND).
                                     getBody()));
+            response.setStatus(404);
         }
         catch (AuthenticationException e) {
             failureHandler.onAuthenticationFailure(request, response, e);

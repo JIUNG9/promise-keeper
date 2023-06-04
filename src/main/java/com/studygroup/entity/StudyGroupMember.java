@@ -2,6 +2,7 @@ package com.studygroup.entity;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.studygroup.enums.GroupRole;
 import lombok.*;
 
@@ -34,6 +35,7 @@ public class StudyGroupMember extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private GroupRole groupRole;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "studyGroupMember",cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true)
     private List<StudyGroupMemberPlan> studyGroupMemberPlanList;
 
@@ -41,7 +43,7 @@ public class StudyGroupMember extends BaseTimeEntity{
     @JoinColumn
     private StudyGroup studyGroup;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
     private Member member;
 

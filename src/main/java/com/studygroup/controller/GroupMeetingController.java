@@ -6,7 +6,7 @@ import com.studygroup.entity.GroupMeeting;
 import com.studygroup.entity.StudyGroup;
 import com.studygroup.exception.ApiError;
 import com.studygroup.service.CheckDuplicationService;
-import com.studygroup.service.group.RetrieveGroupByNameService;
+import com.studygroup.service.group.FindGroupService;
 import com.studygroup.service.groupmeeting.*;
 import com.studygroup.util.constant.ErrorCode;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class GroupMeetingController {
     private final UpdateGroupMeetingTime updateMeetingTimeGroupMeeting;
     private final UpdateDayOfWeekService addDayOfWeekService;
     private final UpdateDayOfWeekService deleteDayOfWeekService;
-    private final RetrieveGroupByNameService retrieveGroupByNameService;
+    private final FindGroupService findGroupService;
     private static final Logger logger = LoggerFactory
             .getLogger(GroupMeetingController.class);
 
@@ -42,7 +42,7 @@ public class GroupMeetingController {
                                   @Qualifier("UpdateMeetingTimeGroupMeeting") UpdateGroupMeetingTime updateMeetingTimeGroupMeeting,
                                   @Qualifier("AddDayOfWeekService") UpdateDayOfWeekService addDayOfWeekService,
                                   @Qualifier("DeleteDayOfWeekService") UpdateDayOfWeekService deleteDayOfWeekService,
-                                  RetrieveGroupByNameService retrieveGroupByNameService) {
+                                  FindGroupService findGroupService) {
         this.deleteGroupMeetingService = deleteGroupMeetingService;
         this.retrieveGroupMeetingByStudyGroupAndSubject = retrieveGroupMeetingByMeetingSubjectService;
         this.createGroupMeetingService = createGroupMeetingService;
@@ -50,7 +50,7 @@ public class GroupMeetingController {
         this.updateMeetingTimeGroupMeeting = updateMeetingTimeGroupMeeting;
         this.addDayOfWeekService = addDayOfWeekService;
         this.deleteDayOfWeekService = deleteDayOfWeekService;
-        this.retrieveGroupByNameService = retrieveGroupByNameService;
+        this.findGroupService = findGroupService;
     }
 
     @PostMapping("/api/groups/{groupName}/admins/meeting")
@@ -58,7 +58,7 @@ public class GroupMeetingController {
                                                      @Valid @RequestBody CreateGroupMeetingForm createGroupMeetingForm) {
 
         String subject = createGroupMeetingForm.getSubject();
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
 
         if(!checkGroupMeetingSubjectDuplicationService.isDuplicated(subject)){
             createGroupMeetingService.create(createGroupMeetingForm,studyGroup);
@@ -79,7 +79,7 @@ public class GroupMeetingController {
                                                           @PathVariable String groupName,
                                                           @PathVariable String subject) {
 
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         GroupMeeting groupMeeting = retrieveGroupMeetingByStudyGroupAndSubject.get(studyGroup,subject);
         LocalTime startTime = updateGroupMeetingTimeForm.getMeetingStartTime();
         LocalTime endTime = updateGroupMeetingTimeForm.getMeetingEndTime();
@@ -97,7 +97,7 @@ public class GroupMeetingController {
                                                @PathVariable String groupName,
                                                @PathVariable String subject) {
 
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         GroupMeeting groupMeeting = retrieveGroupMeetingByStudyGroupAndSubject.get(studyGroup,subject);
 
         addDayOfWeekService.update(groupMeeting, dayOfWeeks);
@@ -113,7 +113,7 @@ public class GroupMeetingController {
                                                   @PathVariable String groupName,
                                                   @PathVariable String subject) {
 
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         GroupMeeting groupMeeting = retrieveGroupMeetingByStudyGroupAndSubject.get(studyGroup,subject);
         deleteDayOfWeekService.update(groupMeeting,dayOfWeeks);
 
@@ -127,7 +127,7 @@ public class GroupMeetingController {
     public ResponseEntity<Object> deleteGroupMeeting(@PathVariable String groupName,
                                                   @PathVariable String subject) {
 
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         GroupMeeting groupMeeting = retrieveGroupMeetingByStudyGroupAndSubject.get(studyGroup,subject);
 
         deleteGroupMeetingService.delete(groupMeeting);

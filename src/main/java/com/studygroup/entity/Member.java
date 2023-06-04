@@ -1,5 +1,6 @@
 package com.studygroup.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.studygroup.enums.Gender;
 import com.studygroup.enums.Role;
 import lombok.AllArgsConstructor;
@@ -24,8 +25,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "member")
-public class
-Member extends BaseTimeEntity implements UserDetails {
+public class Member extends BaseTimeEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,9 +56,11 @@ Member extends BaseTimeEntity implements UserDetails {
     @Cascade({CascadeType.SAVE_UPDATE, CascadeType.PERSIST, CascadeType.REMOVE})
     private List<EmailToken> emailTokenList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<RoomMember> roomMemberList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<StudyGroupMember> studyGroupMemberList;
 

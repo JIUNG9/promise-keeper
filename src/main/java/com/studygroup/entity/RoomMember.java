@@ -21,14 +21,11 @@ public class RoomMember extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private RoomType roomType;
-
-    @ManyToOne
     @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @ManyToOne
     @JoinColumn
+    @ManyToOne(fetch = FetchType.EAGER)
     private ChatRoom room;
 }

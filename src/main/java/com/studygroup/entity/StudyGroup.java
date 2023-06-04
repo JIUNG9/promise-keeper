@@ -2,6 +2,7 @@ package com.studygroup.entity;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.studygroup.enums.Gender;
 import com.studygroup.enums.MainCategory;
 import lombok.AllArgsConstructor;
@@ -37,10 +38,12 @@ public class StudyGroup extends BaseTimeEntity{
     @Column(length = 256, nullable = false)
     private String info;
 
+    @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "studyGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<GroupMeeting> groupMeetingList = new java.util.ArrayList<>();
 
+    @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy ="studyGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<StudyGroupMember> studyGroupMemberList = new java.util.ArrayList<>();

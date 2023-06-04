@@ -9,12 +9,12 @@ import com.studygroup.enums.GroupMemberApplicationConSentOrDeny;
 import com.studygroup.enums.GroupRole;
 import com.studygroup.exception.ApiError;
 import com.studygroup.service.groupmember.CheckGroupMemberIsPendingService;
-import com.studygroup.service.HandleGroupMemberApplicationService;
-import com.studygroup.service.group.RetrieveGroupByNameService;
+import com.studygroup.service.groupmember.HandleGroupMemberApplicationService;
+import com.studygroup.service.group.FindGroupService;
 import com.studygroup.service.groupmember.*;
-import com.studygroup.service.user.RetrieveMemberByIdService;
+import com.studygroup.service.user.RetrieveMemberByAuthPrinciple;
 import com.studygroup.util.constant.ErrorCode;
-import com.studygroup.util.constant.ObjectToLong;
+import com.studygroup.util.ObjectToLong;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,18 +29,18 @@ public class GroupMemberController {
 
     private GroupMemberRemovalService kickGroupMember;
     private GroupMemberRemovalService groupMemberWithdrawalMemberSelf;
+    private FindGroupMemberService findGroupMemberByNickNameService;
+    private FindGroupMemberService findGroupMemberByIdService;
     private final CheckMemberIsAlreadyAppliedService checkMemberIsAlreadyAppliedService;
     private final CheckGroupMemberIsAlreadyDenied checkGroupMemberIsAlreadyDenied;
     private final CheckGroupMemberIsPendingService checkGroupMemberIsPending;
     private final TakeOverGroupAdminService takeOverGroupAdminService;
     private final HandleGroupMemberApplicationService handleGroupMemberApplicationService;
-    private final RetrieveGroupMemberByMemberIdAndGroup retrieveGroupMemberByMemberIdAndGroup;
-    private final RetrieveGroupMemberByNickNameAndGroupService retrieveGroupMemberByNickNameAndGroupService;
     private final RetrieveGroupMembersApplicationService retrieveGroupMembersApplication;
-    private final RetrieveMemberByIdService retrieveMemberByIdService;
+    private final RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple;
     private final ApplyTheGroupService applyTheGroupService;
     private final CheckGroupMemberNickNameIsDuplicatedService checkGroupMemberNickNameIsDuplicatedService;
-    private final RetrieveGroupByNameService retrieveGroupByNameService;
+    private final FindGroupService findGroupService;
 
     public GroupMemberController(@Qualifier("KickGroupMemberAsAdminService") GroupMemberRemovalService kickGroupMember,
                                  @Qualifier("GroupMemberIsOutMemberSelfService") GroupMemberRemovalService groupMemberWithdrawalMemberSelf,
@@ -49,13 +49,13 @@ public class GroupMemberController {
                                  @Qualifier("CheckGroupMemberIsPendingServiceImpl") CheckGroupMemberIsPendingService checkGroupMemberIsPending,
                                  TakeOverGroupAdminService takeOverGroupAdminService,
                                  HandleGroupMemberApplicationService handleGroupMemberApplicationService,
-                                 RetrieveGroupMemberByMemberIdAndGroup retrieveGroupMemberByMemberIdAndGroup,
-                                 RetrieveGroupMemberByNickNameAndGroupService retrieveGroupMemberByNickNameAndGroupService,
+                                 @Qualifier("FindGroupMemberByIdService")FindGroupMemberService findGroupMemberByIdService,
+                                 @Qualifier("FindGroupMemberByNickNameService") FindGroupMemberService findGroupMemberByNickNameService,
                                  @Qualifier("RetrieveGroupMembersApplicationServiceImpl") RetrieveGroupMembersApplicationService retrieveGroupMembersApplication,
-                                 RetrieveMemberByIdService retrieveMemberByIdService,
+                                 RetrieveMemberByAuthPrinciple retrieveMemberByAuthPrinciple,
                                  @Qualifier("ApplyTheGroupServiceAsMember") ApplyTheGroupService applyTheGroupService,
                                  CheckGroupMemberNickNameIsDuplicatedService checkGroupMemberNickNameIsDuplicatedService,
-                                 RetrieveGroupByNameService retrieveGroupByNameService) {
+                                 FindGroupService findGroupService) {
         this.kickGroupMember = kickGroupMember;
         this.groupMemberWithdrawalMemberSelf = groupMemberWithdrawalMemberSelf;
         this.checkMemberIsAlreadyAppliedService = checkMemberIsAlreadyAppliedService;
@@ -63,26 +63,26 @@ public class GroupMemberController {
         this.checkGroupMemberIsPending = checkGroupMemberIsPending;
         this.takeOverGroupAdminService = takeOverGroupAdminService;
         this.handleGroupMemberApplicationService = handleGroupMemberApplicationService;
-        this.retrieveGroupMemberByMemberIdAndGroup = retrieveGroupMemberByMemberIdAndGroup;
-        this.retrieveGroupMemberByNickNameAndGroupService = retrieveGroupMemberByNickNameAndGroupService;
+        this.findGroupMemberByNickNameService = findGroupMemberByNickNameService;
+        this.findGroupMemberByIdService = findGroupMemberByIdService;
         this.retrieveGroupMembersApplication = retrieveGroupMembersApplication;
-        this.retrieveMemberByIdService = retrieveMemberByIdService;
+        this.retrieveMemberByAuthPrinciple = retrieveMemberByAuthPrinciple;
         this.applyTheGroupService = applyTheGroupService;
         this.checkGroupMemberNickNameIsDuplicatedService = checkGroupMemberNickNameIsDuplicatedService;
-        this.retrieveGroupByNameService = retrieveGroupByNameService;
+        this.findGroupService = findGroupService;
     }
 
-    @PostMapping("/api/users/groups/{groupName}")
+    @PostMapping("/api/users/groups/{groupName}/applications")
     public ResponseEntity<Object> userApplyTheGroup(@PathVariable String groupName,
                                                     @Valid @RequestBody GroupApplicationForm groupApplicationForm) {
 
         //JwtUtil parse the token and set the Authentication principle as memberId
         Object memberId = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long memberLongId = ObjectToLong.convert(memberId);
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
 
         if (checkMemberIsAlreadyAppliedService.isAlreadyApplied(studyGroup, memberLongId)) {
-            StudyGroupMember studyGroupMember = retrieveGroupMemberByMemberIdAndGroup.get(studyGroup, memberLongId);
+            StudyGroupMember studyGroupMember = findGroupMemberByIdService.getGroupMember(studyGroup, memberLongId);
             if (checkGroupMemberIsAlreadyDenied.isAlreadyDenied(studyGroupMember)) {
                 return ApiError.buildApiError(
                         ErrorCode.YOU_ARE_DENIED_FROM_GROUP_ADMIN,
@@ -96,7 +96,7 @@ public class GroupMemberController {
         }
             if (!checkGroupMemberNickNameIsDuplicatedService.
                     isDuplicated(studyGroup, groupApplicationForm.getNickName())) {
-                Member member = retrieveMemberByIdService.getMember(ObjectToLong.convert(memberId));
+                Member member = retrieveMemberByAuthPrinciple.getMember(ObjectToLong.convert(memberId));
                 applyTheGroupService.apply(
                         member,
                         studyGroup,
@@ -116,7 +116,7 @@ public class GroupMemberController {
     @GetMapping("/api/groups/{groupName}/admins/members/applications")
     public ResponseEntity<Object> getUsersApplicationForm(@PathVariable String groupName){
 
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         List<GroupApplicationList> pendingMemberList = retrieveGroupMembersApplication.getApplications(studyGroup);
 
         if(pendingMemberList.isEmpty()){
@@ -131,9 +131,9 @@ public class GroupMemberController {
     public ResponseEntity<Object> ManageUserApplicationForm(@PathVariable String groupName,
                                                            @PathVariable String nickName,
                                                             @RequestParam("permission") GroupMemberApplicationConSentOrDeny permission) {
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         StudyGroupMember pendingStudyGroupMember =
-                retrieveGroupMemberByNickNameAndGroupService.get(studyGroup,nickName);
+                findGroupMemberByNickNameService.getGroupMember(studyGroup,nickName);
 
         handleGroupMemberApplicationService.handle(pendingStudyGroupMember,permission);
 
@@ -146,9 +146,9 @@ public class GroupMemberController {
     public ResponseEntity<Object> groupUserWithdrawalUserSelfFromGroup(@PathVariable String groupName,
                                                                         @PathVariable String nickName){
 
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         StudyGroupMember groupMember =
-                retrieveGroupMemberByNickNameAndGroupService.get(studyGroup, nickName);
+                findGroupMemberByNickNameService.getGroupMember(studyGroup, nickName);
 
 
             if (groupMember.getGroupRole().equals(GroupRole.GROUP_ADMIN)) {
@@ -165,9 +165,9 @@ public class GroupMemberController {
     @DeleteMapping("/api/groups/{groupName}/admins/members/{nickName}")
     public ResponseEntity<Object> kickGroupUserFromGroupAsAdmin(@PathVariable String groupName,
                                                          @PathVariable String nickName){
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
         StudyGroupMember groupMember =
-                retrieveGroupMemberByNickNameAndGroupService.get(studyGroup, nickName);
+                findGroupMemberByNickNameService.getGroupMember(studyGroup, nickName);
 
         if(groupMember.getWarnCount() < 10 ){
            return  ApiError.
@@ -188,11 +188,11 @@ public class GroupMemberController {
         //JwtUtil parse the token and set the Authentication principle as memberId
         Object memberId = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        StudyGroup studyGroup = retrieveGroupByNameService.find(groupName);
-        StudyGroupMember currentAdmin = retrieveGroupMemberByMemberIdAndGroup.
-                get(studyGroup, ObjectToLong.convert(memberId));
+        StudyGroup studyGroup = findGroupService.getGroup(groupName);
+        StudyGroupMember currentAdmin = findGroupMemberByIdService.
+                getGroupMember(studyGroup, ObjectToLong.convert(memberId));
         StudyGroupMember newAdmin =
-                retrieveGroupMemberByNickNameAndGroupService.get(studyGroup, nickName);
+                findGroupMemberByNickNameService.getGroupMember(studyGroup, nickName);
         GroupRole groupMemberRole = newAdmin.getGroupRole();
 
 

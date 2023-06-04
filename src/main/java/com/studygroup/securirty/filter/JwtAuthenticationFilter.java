@@ -3,6 +3,7 @@ package com.studygroup.securirty.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studygroup.dto.MemberLoginForm;
 import com.studygroup.entity.Member;
+import com.studygroup.securirty.handler.LoginAuthenticationFailureHandler;
 import com.studygroup.util.CookieUtil;
 import com.studygroup.util.JwtUtil;
 import com.studygroup.util.constant.LoginExpirationTime;

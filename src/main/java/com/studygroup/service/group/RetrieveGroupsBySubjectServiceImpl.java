@@ -13,7 +13,7 @@ public class RetrieveGroupsBySubjectServiceImpl implements RetrieveGroupsBySubje
 
     private final GroupRepository groupRepository;
     @Override
-    public List<StudyGroup> find(String subject) {
+    public List<StudyGroup> get(String subject) {
         return groupRepository.findBySubjectLike("%" + subject + "%");
     }
 }

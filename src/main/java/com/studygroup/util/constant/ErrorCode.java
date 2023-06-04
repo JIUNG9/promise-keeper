@@ -32,7 +32,7 @@ public enum ErrorCode {
     GROUP_IS_NOT_EXISTED_BY_NAME(2002,"The group is not existed by name"),
     GROUP_NAME_IS_DUPLICATED(2003,"The group name is duplicated"),
     CAN_NOT_FIND_WITH_GROUP_NAME_AND_NICK_NAME(2004,"There is no user with that group name and user nickname"),
-    GROUP_MEMBER_IS_NOT_EXISTED(2005,"Group member is not existed in that group"),
+    GROUP_MEMBER_IS_NOT_EXISTED(2005,"The member is not existed in that group"),
     CAN_NOT_DELETE_GROUP(2006, "Can not delete the group, there is a member in group"),
     GROUP_NICK_NAME_IS_DUPLICATED(2007, "The nick name is duplicated use the another one"),
     YOU_ARE_NOW_PENDING_STATUS(2008, "Wait until group admin give you permission"),
@@ -56,8 +56,10 @@ public enum ErrorCode {
     CAN_NOT_ACCESS_WEB_CAM(6000, "can not access the web cam, plz grant the authority website can access the camera"),
 
     //Chat error
-    USER_IS_NOT_IN_CHAT_ROOM(7000,"User is not chat room"),
-
+    USER_IS_NOT_IN_CHAT_ROOM(7000,"you are not in chat room"),
+    CHAT_ROOM_IS_ALREADY_EXISTED(7001, "Chat room is already exist"),
+    CHAT_ROOM_IS_NOT_EXISTED(7002, "Chat room is not existed"),
+    RABBITMQ_SERVER_ERROR(7003, null),
     //Chat error
     VALIDATION_ERROR(8000, "Validation error"),
 
