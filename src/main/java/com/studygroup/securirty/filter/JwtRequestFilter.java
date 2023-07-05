@@ -27,9 +27,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @AllArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-
-  private static final Logger logger = LoggerFactory.getLogger(JwtRequestFilter.class);
-
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException, AuthenticationException {

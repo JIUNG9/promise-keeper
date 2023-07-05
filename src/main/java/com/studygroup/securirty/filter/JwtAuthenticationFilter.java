@@ -86,7 +86,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     response.addCookie(cookie);
 
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.getWriter().write(new ObjectMapper().writeValueAsString(cookie.getValue()));
+    response.getWriter().write("로그인이 성공되었습니다.");
 
   }
 

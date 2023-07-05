@@ -8,9 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 public class ConvertObjectToJson {
 
   public static String convert(Object object) throws JsonProcessingException {
-    if (object == null) {
-      return null;
-    }
+
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
 

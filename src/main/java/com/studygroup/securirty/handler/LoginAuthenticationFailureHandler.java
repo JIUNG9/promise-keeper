@@ -41,14 +41,8 @@ public class LoginAuthenticationFailureHandler implements AuthenticationFailureH
       response.setStatus(HttpStatus.FORBIDDEN.value());
     }
 
-    ResponseEntity responseEntity = ApiError.buildApiError(
-        ApiError.builder().
-            timestamp(LocalDateTime.now()).
-            status(status).
-            message(errorCode.getMessage()).
-            code(errorCode.getCode()).
-            build());
-
+    assert errorCode != null;
+    ResponseEntity<Object> responseEntity = ApiError.buildApiError(errorCode,status);
     response.getWriter().write(ConvertObjectToJson.convert(responseEntity.getBody()));
   }
 

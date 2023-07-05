@@ -30,7 +30,6 @@ public class ApiError {
   }
 
   public static ResponseEntity<Object> buildApiError(ErrorCode errorCode, HttpStatus httpStatus) {
-
     ApiError apiError = ApiError.
         builder().
         status(httpStatus).
