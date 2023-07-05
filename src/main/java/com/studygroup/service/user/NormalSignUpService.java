@@ -1,35 +1,33 @@
 package com.studygroup.service.user;
 
-import com.studygroup.entity.Member;
-import com.studygroup.enums.Role;
+import com.studygroup.dto.member.MemberSignUpForm;
+import com.studygroup.exception.CustomIllegalArgumentException;
 import com.studygroup.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.studygroup.service.common.DuplicationCheckerService;
+import com.studygroup.service.group.member.CheckEmailDuplicationService;
+import com.studygroup.util.error.ErrorCode;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
-@Service("NormalSignUpService")
-@RequiredArgsConstructor
+@Service
 public class NormalSignUpService implements SignUpService {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final CreateUserService createUserService;
+  private final DuplicationCheckerService<String> checkDuplicationService;
 
-    @Override
-    public void signUp(Member member) {
+  public NormalSignUpService(CreateUserService createUserService,
+      UserRepository userRepository) {
+    this.createUserService = createUserService;
+    this.checkDuplicationService = new DuplicationCheckerService<>(
+        new CheckEmailDuplicationService(userRepository));
+  }
 
-            Member insertMember = Member.
-                    builder().
-                    email(member.getEmail()).
-                    name(member.getName()).
-                    gender(member.getGender()).
-                    role(Role.ROLE_USER).
-                    age(member.getAge()).
-                    password(bCryptPasswordEncoder.encode(member.getPassword())).
-                    build();
 
-                userRepository.save(insertMember);
-
+  @Override
+  public void signUp(MemberSignUpForm signUpForm) {
+    if(checkDuplicationService.isDuplicated(signUpForm.getEmail())){
+        throw new CustomIllegalArgumentException(ErrorCode.EMAIL_IS_DUPLICATED);
     }
+    createUserService.create(signUpForm);
+  }
 }

@@ -1,16 +1,18 @@
 package com.studygroup.repository;
 
 
-import com.studygroup.entity.StudyGroup;
+import com.studygroup.domain.StudyGroup;
 import com.studygroup.enums.MainCategory;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GroupRepository extends JpaRepository<StudyGroup, Integer> {
 
-     StudyGroup findByName(String name);
-     List<StudyGroup> findBySubjectLike(String subject);
-     List<StudyGroup> findByMainCategory(MainCategory mainCategory);
+  StudyGroup findByName(String groupName
+  );
+
+  List<StudyGroup> findBySubjectLike(String subject);
+
+  List<StudyGroup> findByMainCategory(MainCategory mainCategory);
 
 }

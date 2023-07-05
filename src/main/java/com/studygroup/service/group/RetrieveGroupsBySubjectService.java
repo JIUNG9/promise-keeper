@@ -1,11 +1,11 @@
 package com.studygroup.service.group;
 
-import com.studygroup.entity.StudyGroup;
-import org.springframework.stereotype.Service;
-
+import com.studygroup.domain.StudyGroup;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
 @Service
 public interface RetrieveGroupsBySubjectService {
-    public List<StudyGroup> find(String subject);
+
+  List<StudyGroup> get(String subject);
 }
