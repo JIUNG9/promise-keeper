@@ -1,47 +1,35 @@
 package com.studygroup.service.email;
 
-import com.studygroup.entity.EmailToken;
-import com.studygroup.entity.Member;
+import com.studygroup.domain.EmailToken;
+import com.studygroup.domain.Member;
 import com.studygroup.enums.TokenType;
 import com.studygroup.repository.EmailRepository;
-import com.studygroup.repository.UserRepository;
-import com.studygroup.util.constant.ErrorCode;
-import com.studygroup.util.constant.TokenGenerator;
-import com.studygroup.util.lambda.BindParameterSupplier;
+import com.studygroup.util.token.TokenGenerator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
-@Service
+@Service("SaveThePasswordResetToken")
 @RequiredArgsConstructor
-@Qualifier("SaveThePasswordResetToken")
 public class SaveThePasswordResetToken implements SaveTheToken {
 
-    private final EmailRepository emailRepo;
-    private final UserRepository userRepo;
+  private final EmailRepository emailRepo;
 
 
-    @Override
-    public String save(Long memberId) {
+  @Override
+  public String save(Member member) {
 
-        String token = TokenGenerator.setTokenString();
-        Member member = userRepo.findById(memberId);
+    String token = TokenGenerator.setTokenString();
 
-        EmailToken emailToken = EmailToken.
-                builder().
-                member(member).
-                tokenType(TokenType.PASSWORD_RESET_TOKEN).
-                confirmationToken(token).
-                build();
+    EmailToken emailToken = EmailToken.
+        builder().
+        member(member).
+        tokenType(TokenType.PASSWORD_RESET_TOKEN).
+        value(token).
+        build();
 
-        Optional.of(
-                emailRepo.save(emailToken)).
-                    orElseThrow(BindParameterSupplier.
-                        bind(IllegalArgumentException::new,
-                                ErrorCode.SAVE_ERROR.getMessage()));
-        return token;
+    emailRepo.save(emailToken);
 
-    }
+    return token;
+
+  }
 }

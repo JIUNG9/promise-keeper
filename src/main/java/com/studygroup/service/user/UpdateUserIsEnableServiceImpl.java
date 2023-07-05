@@ -1,7 +1,6 @@
 package com.studygroup.service.user;
 
-import com.studygroup.entity.Member;
-import com.studygroup.repository.ChatRoomMemberRepository;
+import com.studygroup.domain.Member;
 import com.studygroup.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,23 +9,23 @@ import org.springframework.stereotype.Service;
 @Service("UpdateUserIsEnableService")
 public class UpdateUserIsEnableServiceImpl implements UpdateUserIsEnableService {
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    @Override
-    public void update(Member member, boolean isEnabled) {
+  @Override
+  public void update(Member member, boolean isEnabled) {
 
-        Member updatePasswordMember = Member.
-                builder().
-                name(member.getName()).
-                password(member.getPassword()).
-                id(member.getId()).
-                email(member.getEmail()).
-                age(member.getAge()).
-                emailVerified(isEnabled).
-                role(member.getRole()).
-                gender(member.getGender()).
-                build();
+    Member updatePasswordMember = Member.
+        builder().
+        name(member.getName()).
+        password(member.getPassword()).
+        id(member.getId()).
+        email(member.getEmail()).
+        age(member.getAge()).
+        emailVerified(isEnabled).
+        role(member.getRole()).
+        gender(member.getGender()).
+        build();
 
-        userRepository.save(updatePasswordMember);
-    }
+    userRepository.save(updatePasswordMember);
+  }
 }

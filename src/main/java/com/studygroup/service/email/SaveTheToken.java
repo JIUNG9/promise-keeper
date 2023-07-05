@@ -1,7 +1,9 @@
 package com.studygroup.service.email;
 
-import com.studygroup.entity.EmailToken;
+import com.studygroup.domain.Member;
 
 public interface SaveTheToken {
-    String save(Long memberId);
+
+  String save(Member member);
+
 }

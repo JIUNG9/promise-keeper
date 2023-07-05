@@ -1,13 +1,18 @@
 package com.studygroup.repository;
 
-import com.studygroup.entity.EmailToken;
+import com.studygroup.domain.EmailToken;
+import com.studygroup.domain.Member;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface EmailRepository extends JpaRepository<EmailToken, Integer> {
-    void deleteById(Long id);
-    List<EmailToken> findByMember_Id(Long memberId);
+public interface EmailRepository extends JpaRepository<EmailToken, Long> {
+
+  Optional<EmailToken> findByValue(String value);
+  List<EmailToken> findByMember(Member member);
+
+
 }
