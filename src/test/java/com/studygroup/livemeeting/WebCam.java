@@ -33,13 +33,8 @@ public class WebCam {
             byte[] bytes = outputStream.toByteArray();
             ByteArrayInputStream inStream = new ByteArrayInputStream(bytes);
             log.info(String.valueOf(inStream.readNBytes(1)));
-<<<<<<< HEAD
             BufferedImage newImage = ImageIO.read(inStream);
             ImageIO.write(newImage, "jpg", new File("/Users/ung/Downloads/test.jpg"));
-=======
-//            BufferedImage newImage = ImageIO.read(inStream);
-//            ImageIO.write(newImage, "jpg", new File("/Users/ung/Downloads/test.jpg"));
->>>>>>> 7c3dbf05b4ae7da5f5b0cb57a6434bd46693aa91
         }
     }
 
